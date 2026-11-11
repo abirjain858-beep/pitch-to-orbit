@@ -1,0 +1,1622 @@
+<title>Pitch to Orbit</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: a blueprint drawing sheet. The craft drawing is pinned on the left, the numbered work sheet sits on the right, and on phones they stack. */
+:root{
+  --sheet:#0b2149;
+  --panel:#102a5c;
+  --line:#4d7fd6;
+  --line-soft:rgba(125,170,240,.30);
+  --ink:#eaf2ff;
+  --dim:#9db7e6;
+  --signal:#ff6b2c;
+  --signal-ink:#1d0b03;
+  --coin:#ffd24a;
+  --ok:#5fe3a1;
+  --bad:#ff6b72;
+  --field:#071a40;
+  --grid:rgba(130,175,255,.07);
+  --grid-major:rgba(130,175,255,.14);
+  --font-display:'Big Shoulders Display','Arial Narrow',Impact,sans-serif;
+  --font-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--sheet)}
+body{
+  margin:0;
+  background-color:var(--sheet);
+  background-image:
+    linear-gradient(var(--grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid) 1px,transparent 1px),
+    linear-gradient(var(--grid-major) 1px,transparent 1px),
+    linear-gradient(90deg,var(--grid-major) 1px,transparent 1px);
+  background-size:24px 24px,24px 24px,120px 120px,120px 120px;
+  color:var(--ink);
+  font:15px/1.5 var(--font-body);
+  padding-block:20px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+.wrap{max-width:1180px;margin:0 auto}
+h1,h2{font-family:var(--font-display);text-transform:uppercase;margin:0;text-wrap:balance}
+h1{font-weight:800;font-size:clamp(36px,7vw,60px);line-height:.9;letter-spacing:.02em}
+h2{font-weight:800;font-size:clamp(26px,4vw,34px);line-height:1;letter-spacing:.02em}
+p{margin:0}
+.meta{font:500 11px/1.4 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.note{color:var(--dim);font-size:13px}
+.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+.top{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;justify-content:space-between;border-bottom:2px solid var(--line);padding-bottom:14px;margin-bottom:14px}
+.top .meta{margin-bottom:8px}
+.wallet{display:flex;align-items:center;gap:12px;border:1px solid var(--line);padding:8px 14px;background:rgba(7,26,64,.7)}
+.wallet .coin{width:20px;height:20px;border-radius:50%;background:var(--coin);box-shadow:inset 0 0 0 4px rgba(120,80,0,.28)}
+.wallet b{font:600 26px/1 var(--font-mono);font-variant-numeric:tabular-nums}
+.wallet.pulse{animation:pulse .9s ease-out}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,210,74,.7)}100%{box-shadow:0 0 0 16px rgba(255,210,74,0)}}
+
+.steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:16px}
+.steps button{display:grid;gap:2px;text-align:left;border:0;background:var(--sheet);color:var(--dim);padding:10px 12px;cursor:pointer;font:inherit;min-height:56px}
+.steps button .meta{color:inherit}
+.steps button b{font:800 20px/1 var(--font-display);text-transform:uppercase;letter-spacing:.03em}
+.steps button[aria-current="step"]{background:var(--ink);color:var(--sheet)}
+.steps button:disabled{opacity:.38;cursor:not-allowed}
+.steps button:focus-visible,.btn:focus-visible,textarea:focus-visible,input[type=text]:focus-visible{outline:2px solid var(--coin);outline-offset:2px}
+@media (max-width:640px){.steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.layout{display:grid;grid-template-columns:minmax(260px,360px) minmax(0,1fr);gap:16px;align-items:start}
+.side{position:sticky;top:12px}
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .side{position:static}
+  .side .bd{display:grid;grid-template-columns:130px minmax(0,1fr);gap:12px;align-items:center}
+}
+
+.panel{border:1px solid var(--line);background:rgba(16,42,92,.88)}
+.panel>.hd{display:flex;justify-content:space-between;gap:8px;padding:8px 14px;border-bottom:1px solid var(--line);font:500 11px var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.panel>.bd{padding:16px}
+.stack{display:grid;gap:20px}
+.stack>*{min-width:0}
+
+.craft{position:relative;display:grid;place-items:center;padding:4px}
+.craft::before{content:"";position:absolute;left:50%;top:3%;bottom:3%;border-left:1px dashed var(--line-soft)}
+.craft svg{position:relative;width:100%;max-width:330px;height:auto;display:block}
+.spec{display:grid;grid-template-columns:auto minmax(0,1fr);gap:5px 12px;margin:12px 0 0;font:12px/1.4 var(--font-mono)}
+.side .bd .spec{margin:0}
+.spec dt{color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+.spec dd{margin:0;text-align:right;overflow-wrap:anywhere}
+
+label,legend{font:500 12px/1.3 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+fieldset{border:0;margin:0;padding:0;min-width:0;display:grid;gap:10px}
+legend{padding:0;margin-bottom:10px;float:left;width:100%}
+legend+*{clear:both}
+.field{display:grid;gap:8px}
+input[type=text],textarea{width:100%;background:var(--field);border:1px solid var(--line);color:var(--ink);padding:10px 12px;font:15px/1.5 var(--font-body);border-radius:0}
+textarea{resize:vertical;min-height:112px}
+.count{text-align:right;font:12px var(--font-mono);color:var(--dim)}
+
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,190px),1fr))}
+.grid.tight{grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr))}
+.opt{position:relative;display:grid;gap:4px;align-content:start;border:1px solid var(--line-soft);background:rgba(7,26,64,.55);padding:12px;cursor:pointer;text-transform:none;letter-spacing:0;font:inherit;color:var(--ink)}
+.opt b{font:800 20px/1.05 var(--font-display);text-transform:uppercase;letter-spacing:.03em}
+.opt input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.opt:has(input:checked){border-color:var(--signal);background:rgba(255,107,44,.13);box-shadow:inset 0 0 0 1px var(--signal)}
+.opt:has(input:focus-visible){outline:2px solid var(--coin);outline-offset:2px}
+.opt:has(input:disabled){opacity:.45;cursor:not-allowed}
+.opt:has(input:disabled:checked){opacity:1}
+.opt .mini{display:block;height:120px;margin-bottom:4px}
+.opt .mini svg{height:100%;width:100%}
+.opt .meta,.opt .note{text-transform:none;letter-spacing:.02em}
+.opt .meta{text-transform:uppercase;letter-spacing:.08em}
+
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.sw{position:relative;width:40px;height:40px;background:var(--c);border:2px solid rgba(255,255,255,.35);cursor:pointer;display:block}
+.sw input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:pointer}
+.sw:has(input:checked),.sw.on{outline:3px solid var(--ink);outline-offset:2px}
+.sw:has(input:focus-visible){outline:3px solid var(--coin);outline-offset:2px}
+.sw.custom{background:conic-gradient(from 0deg,#ff5f5f,#ffd24a,#5fe3a1,#37d0ff,#9a7bdc,#ff5f5f)}
+.sw.custom.on{background:var(--c)}
+.sw.custom span{position:absolute;inset:0;display:grid;place-items:center;font:600 18px var(--font-mono);color:#071430;mix-blend-mode:normal;text-shadow:0 0 3px #fff}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border:1px solid var(--line);background:transparent;color:var(--ink);font:600 13px/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;cursor:pointer;border-radius:0}
+.btn.primary{background:var(--signal);border-color:var(--signal);color:var(--signal-ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:not(:disabled):hover{filter:brightness(1.12)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+
+.sponsor{display:grid;gap:8px;align-content:start;border:1px solid var(--line-soft);background:rgba(7,26,64,.55);padding:12px}
+.sponsor .sname{font:800 22px/1 var(--font-display);text-transform:uppercase;letter-spacing:.03em}
+.sponsor .quote{font-size:14px}
+.sponsor .grant{display:flex;justify-content:space-between;gap:8px;align-items:baseline;border-top:1px solid var(--line-soft);padding-top:8px;font-family:var(--font-mono)}
+.sponsor .grant b{color:var(--coin);font-size:17px}
+.sponsor.t-none .grant b{color:var(--bad)}
+.sponsor[class*="t-"]{animation:rise .5s ease-out both;animation-delay:var(--d,0s)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.summary{border:1px solid var(--coin);padding:12px 14px;background:rgba(255,210,74,.08)}
+
+.perk{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;align-items:center;padding:14px 0;border-top:1px solid var(--line-soft)}
+.perk:first-child{border-top:0}
+.perk .nm{font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font:500 11px var(--font-mono);letter-spacing:.06em;padding:2px 8px;border:1px solid var(--line-soft);color:var(--dim)}
+.chip.coin{color:var(--coin);border-color:rgba(255,210,74,.5)}
+.ctl{display:flex;align-items:center;gap:8px}
+.qbtn{min-width:44px;min-height:44px;padding:0 12px}
+.qty{min-width:22px;text-align:center;font:600 16px var(--font-mono)}
+.tablewrap{overflow-x:auto}
+table.fit{width:100%;border-collapse:collapse;font:13px var(--font-mono)}
+table.fit th,table.fit td{padding:8px 10px;border-bottom:1px solid var(--line-soft);text-align:left;white-space:nowrap}
+table.fit th{color:var(--dim);font-weight:500;text-transform:uppercase;letter-spacing:.08em;font-size:11px}
+.okc{color:var(--ok)}.badc{color:var(--bad)}
+
+.rocketcard .stats{display:flex;flex-wrap:wrap;gap:4px 12px}
+#rockets .grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr))}
+.pc{display:grid;gap:12px;margin-top:6px;padding-top:10px;border-top:1px solid var(--line-soft);letter-spacing:0}
+.pc .blk{display:grid;grid-template-columns:26px minmax(0,1fr);gap:8px;align-items:start}
+.pc .blk svg{width:26px;height:26px}
+.pc .lab{display:block;font:500 11px var(--font-mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.pc .up .lab{color:var(--ok)}
+.pc .down .lab{color:var(--bad)}
+.pc .it{display:block;font-size:13px;line-height:1.4;color:var(--ink)}
+.who{display:flex;gap:12px;align-items:center}
+.who>div:last-child{min-width:0}
+.avatar{flex:none;width:64px;height:64px;border-radius:50%;border:2px solid var(--line);overflow:hidden;background:#1a3a7a}
+.avatar svg{display:block;width:100%;height:100%}
+.scene{margin:0;border:1px solid var(--line-soft);background:#050a18}
+.scene svg{display:block;width:100%;height:auto}
+.scene figcaption{padding:6px 10px;border-top:1px solid var(--line-soft);font:500 11px var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.price{font:600 18px var(--font-mono);color:var(--coin)}
+.stage{position:relative;height:380px;overflow:hidden;border:1px solid var(--line);background:
+  radial-gradient(1.5px 1.5px at 12% 18%,#fff,transparent),radial-gradient(1px 1px at 30% 40%,#cfe0ff,transparent),radial-gradient(1.5px 1.5px at 62% 12%,#fff,transparent),radial-gradient(1px 1px at 80% 34%,#cfe0ff,transparent),radial-gradient(1px 1px at 90% 70%,#fff,transparent),radial-gradient(1px 1px at 8% 62%,#cfe0ff,transparent),
+  linear-gradient(#061638,#143272)}
+.stage .ground{position:absolute;left:0;right:0;bottom:0;height:22%;background:#0a1b40;border-top:2px solid var(--line)}
+.stage #rk{position:relative;height:100%;transition:transform 2.6s cubic-bezier(.55,0,.9,.5)}
+.stage #rk svg{height:100%;width:auto;display:block;margin:0 auto}
+.stage.go #rk{transform:translateY(-118%)}
+.stage .count{position:absolute;left:12px;top:10px;font:600 26px var(--font-mono);letter-spacing:.1em}
+.flame{opacity:0;transform-box:fill-box;transform-origin:50% 0}
+.stage.go .flame{opacity:1;animation:flick .12s infinite alternate}
+@keyframes flick{from{transform:scaleY(.82)}to{transform:scaleY(1.18)}}
+
+.bar{height:12px;border:1px solid var(--line-soft);background:var(--field)}
+.bar i{display:block;height:100%;background:var(--ok)}
+.bar.warn i{background:var(--coin)}
+.bar.bad i{background:var(--bad)}
+.odds{font:600 36px/1 var(--font-mono)}
+.result{border:2px solid var(--line);padding:16px;display:grid;gap:12px}
+.result.ok{border-color:var(--ok)}
+.result.bad{border-color:var(--bad)}
+.verdict{font:800 clamp(44px,9vw,72px)/.9 var(--font-display);text-transform:uppercase;letter-spacing:.02em}
+.result.ok .verdict{color:var(--ok)}
+.result.bad .verdict{color:var(--bad)}
+.msg{font-size:17px}
+
+.meters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr));gap:12px}
+.meter{display:grid;gap:6px}
+.evt{margin:0;font:800 26px/1.05 var(--font-display);text-transform:uppercase;letter-spacing:.03em}
+.oplog{margin:0;padding-left:20px;display:grid;gap:6px;font-size:14px}
+.linkbox{margin-top:14px}
+.impact{border-top:1px solid var(--line-soft);padding-top:12px}
+.impactview{position:relative}
+.hot{position:absolute;width:44px;height:44px;padding:9px;transform:translate(-50%,-50%);border-radius:50%;border:2px solid var(--t);background:#071430;color:#fff;cursor:pointer;display:grid;place-items:center}
+.hot svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hot:hover{filter:brightness(1.3)}
+.hot:focus-visible{outline:2px solid var(--coin);outline-offset:2px}
+.hot[aria-pressed="true"]{background:var(--t);color:#071430;animation:hotpulse 1.6s infinite}
+@keyframes hotpulse{50%{box-shadow:0 0 0 7px rgba(255,255,255,.2)}}
+.beam{stroke-dasharray:7 7;animation:beamflow .7s linear infinite}
+@keyframes beamflow{to{stroke-dashoffset:-14}}
+
+/* ---------- Space skin: looks and motion only ---------- */
+html{background:radial-gradient(120% 90% at 80% -10%,#3b2a86 0%,#14245f 38%,#060d2a 75%,#030616 100%) fixed}
+body{background-color:transparent;background-size:48px 48px,48px 48px,240px 240px,240px 240px}
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+#fx{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:50}
+.brand{display:flex;align-items:center;gap:clamp(12px,3vw,26px);min-width:0}
+.patch{flex:none;width:clamp(112px,17vw,172px);padding:0;border:0;background:none;cursor:pointer;filter:drop-shadow(0 8px 22px rgba(255,160,50,.35));transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.patch:hover{transform:scale(1.07) rotate(-4deg)}
+.patch:active{transform:scale(.95)}
+.patch:focus-visible{outline:2px solid var(--coin);outline-offset:4px;border-radius:12px}
+.patch svg{display:block;width:100%;height:auto;overflow:visible}
+.patch.spin svg{animation:patchspin .9s cubic-bezier(.3,1.2,.5,1)}
+@keyframes patchspin{to{transform:rotate(360deg)}}
+.patch .orb{transform-origin:100px 96px;animation:orbit 7s linear infinite}
+@keyframes orbit{to{transform:rotate(360deg)}}
+.patch .ship{animation:shipbob 2.6s ease-in-out infinite}
+@keyframes shipbob{50%{transform:translateY(-5px)}}
+.patch .twk{animation:twk 1.8s ease-in-out infinite}
+.patch .twk.b{animation-delay:.7s}
+@keyframes twk{50%{opacity:.25}}
+h1{background:linear-gradient(95deg,#fff 20%,#ffd24a 62%,#ff8a3d);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 14px rgba(255,180,70,.28))}
+.top{border-bottom:0;align-items:center}
+.wallet{border-radius:999px;border-color:rgba(255,210,74,.6);background:rgba(7,18,50,.75);box-shadow:0 0 20px rgba(255,210,74,.18);position:relative}
+.wallet .coin{animation:coinspin 3.2s ease-in-out infinite}
+@keyframes coinspin{0%,70%,100%{transform:scaleX(1)}85%{transform:scaleX(.12)}}
+.delta{position:absolute;right:16px;top:-6px;font:700 18px var(--font-mono);animation:deltaup 1.1s ease-out forwards;pointer-events:none}
+.delta.up{color:var(--ok)}.delta.down{color:var(--bad)}
+@keyframes deltaup{to{transform:translateY(-30px);opacity:0}}
+.steps{border-radius:14px;overflow:hidden;background:rgba(125,170,240,.28);margin-bottom:8px}
+.steps button{background:rgba(9,24,66,.9);transition:background .2s,color .2s}
+.steps button:not(:disabled):not([aria-current="step"]):hover{background:#1c3c86;color:var(--ink)}
+.steps button[aria-current="step"]{background:linear-gradient(120deg,#ffd24a,#ff8a3d);color:#1d0b03}
+.steps button.done b::after{content:" ✓";color:var(--ok)}
+.steps button[aria-current="step"].done b::after{color:#1d0b03}
+.track{position:relative;height:30px;margin-bottom:12px}
+.track::before{content:"";position:absolute;left:0;right:0;top:14px;border-top:2px dotted rgba(157,183,230,.45)}
+.track i{position:absolute;left:0;top:13px;height:4px;border-radius:4px;background:linear-gradient(90deg,#ff6b2c,#ffd24a);transition:width .7s cubic-bezier(.3,1,.4,1)}
+.track span{position:absolute;top:0;width:30px;height:30px;margin-left:-15px;transition:left .7s cubic-bezier(.3,1,.4,1)}
+.track svg{width:100%;height:100%;display:block}
+.panel{border-radius:16px;border-color:rgba(125,170,240,.45);background:rgba(13,32,82,.74);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 14px 40px rgba(2,6,24,.45);overflow:hidden}
+#sheet>.panel{animation:sheetin .45s cubic-bezier(.2,.9,.3,1) both}
+@keyframes sheetin{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+.side{overflow:hidden}
+.craft{perspective:700px}
+.craft::before{display:none}
+#craft::after{content:"";position:absolute;left:18%;right:18%;bottom:0;height:12px;border-radius:50%;background:rgba(55,208,255,.22);filter:blur(7px)}
+.craft svg{transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .15s;animation:floaty 4s ease-in-out infinite}
+@keyframes floaty{50%{translate:0 -8px}}
+.craft.pop{animation:craftpop .5s cubic-bezier(.3,1.7,.5,1)}
+@keyframes craftpop{0%{transform:scale(.82)}100%{transform:scale(1)}}
+.opt{border-radius:13px;transition:transform .18s cubic-bezier(.3,1.5,.5,1),border-color .18s,box-shadow .18s,background .18s}
+.opt:not(:has(input:disabled)):hover{transform:translateY(-4px);border-color:var(--coin);box-shadow:0 10px 24px rgba(255,190,70,.16)}
+.opt:not(:has(input:disabled)):active{transform:scale(.98)}
+.opt:has(input:checked){box-shadow:0 0 0 1px var(--signal),0 0 24px rgba(255,107,44,.34);animation:optpick .34s cubic-bezier(.3,1.7,.5,1)}
+@keyframes optpick{0%{transform:scale(.96)}100%{transform:scale(1)}}
+.opt:has(input:checked)::after{content:"✓";position:absolute;right:9px;top:9px;width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:var(--signal);color:#1d0b03;font:700 15px var(--font-body);pointer-events:none}
+.opt .mini{transition:transform .25s cubic-bezier(.3,1.7,.5,1)}
+.opt:not(:has(input:disabled)):hover .mini{transform:scale(1.12) translateY(-3px)}
+.sw{border-radius:9px;transition:transform .16s cubic-bezier(.3,1.7,.5,1)}
+.sw:hover{transform:scale(1.14) rotate(-3deg)}
+.btn{border-radius:11px;transition:transform .15s cubic-bezier(.3,1.7,.5,1),box-shadow .15s,filter .15s}
+.btn.primary{background:linear-gradient(120deg,#ffb03a,#ff6b2c);box-shadow:0 6px 18px rgba(255,107,44,.34)}
+.btn:not(:disabled):hover{transform:translateY(-2px)}
+.btn:not(:disabled):active{transform:scale(.96)}
+#launchbtn:not(:disabled){animation:ready 1.5s ease-in-out infinite}
+@keyframes ready{50%{box-shadow:0 0 0 9px rgba(255,107,44,.16),0 6px 18px rgba(255,107,44,.34)}}
+input[type=text],textarea{border-radius:10px;transition:box-shadow .15s}
+input[type=text]:focus,textarea:focus{box-shadow:0 0 0 3px rgba(255,210,74,.25)}
+.sponsor{border-radius:13px;transition:transform .18s}
+.sponsor:hover{transform:translateY(-3px)}
+.avatar{transition:transform .25s cubic-bezier(.3,1.7,.5,1)}
+.sponsor:hover .avatar{transform:scale(1.1) rotate(-4deg)}
+.perk{padding-inline:8px;border-radius:9px;transition:background .15s}
+.perk:hover{background:rgba(125,170,240,.1)}
+.chip{border-radius:999px}
+.summary,.result,.scene,.stage,.bar,.bar i{border-radius:10px}
+.scene,.stage{overflow:hidden}
+.bar{overflow:hidden}
+.bar i{transition:width .4s;background-image:linear-gradient(90deg,var(--ok),#b9ffdc)}
+.bar.warn i{background-image:linear-gradient(90deg,var(--coin),#ffe9a3)}
+.bar.bad i{background-image:linear-gradient(90deg,var(--bad),#ffb0b4)}
+.stage .count{left:0;right:0;top:14px;color:#fff;text-align:center;font-size:clamp(28px,6vw,44px);text-shadow:0 0 18px rgba(255,210,74,.7)}
+.stage.go{animation:rumble .12s linear 14}
+@keyframes rumble{25%{transform:translate(2px,1px)}75%{transform:translate(-2px,-1px)}}
+.stage .ground::after{content:"";position:absolute;left:50%;top:-34px;width:60px;height:60px;margin-left:-30px;border-radius:50%;background:rgba(235,240,250,.75);box-shadow:-46px 16px 0 2px rgba(220,228,245,.6),46px 14px 0 4px rgba(220,228,245,.55);filter:blur(5px);opacity:0;transform:scale(.3)}
+.stage.go .ground::after{animation:smoke 2.4s ease-out forwards}
+@keyframes smoke{20%{opacity:1}100%{opacity:0;transform:scale(3.6)}}
+[hidden]{display:none!important}
+html,body{overflow-x:clip}
+#sheet{min-width:0}
+@media (max-width:900px){.layout{grid-template-columns:minmax(0,1fr)}}
+.launchstep .layout{grid-template-columns:minmax(0,1fr)}
+.launchstep .side{display:none}
+.stage{height:clamp(500px,84vh,860px);border-radius:16px;background:#0a1c3f}
+.stage canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.stage .count{z-index:2;font-size:clamp(40px,8vw,76px);font-family:var(--font-mono);text-shadow:0 2px 16px rgba(0,0,0,.65)}
+.callout{position:absolute;z-index:2;left:14px;bottom:14px;max-width:calc(100% - 110px);padding:8px 12px;border-radius:10px;background:rgba(3,8,26,.76);font:500 clamp(13px,2vw,17px) var(--font-body)}
+.tele{position:absolute;z-index:2;right:14px;top:14px;padding:6px 10px;border-radius:9px;background:rgba(3,8,26,.76);font:500 12px var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.stage .count{top:50px}
+.skipbtn{position:absolute;z-index:3;right:14px;bottom:14px;background:rgba(3,8,26,.8)}
+#launchrow{display:grid;gap:12px}
+#launchbtn{width:100%;min-height:clamp(110px,18vh,170px);border:0;border-radius:18px;background:linear-gradient(180deg,#46e883,#14b656);color:#032211;font:800 clamp(52px,11vw,104px)/1 var(--font-display);letter-spacing:.06em;box-shadow:0 12px 34px rgba(40,220,110,.42),inset 0 2px 0 rgba(255,255,255,.45)}
+#launchbtn:not(:disabled){animation:readygreen 1.5s ease-in-out infinite}
+#launchbtn:not(:disabled):hover{filter:brightness(1.08)}
+#launchbtn:disabled{filter:grayscale(.75);opacity:.55}
+@keyframes readygreen{50%{box-shadow:0 12px 44px rgba(40,220,110,.75),0 0 0 11px rgba(70,232,131,.18),inset 0 2px 0 rgba(255,255,255,.45)}}
+#launchrow .btn:not(#launchbtn){justify-self:start}
+.tip{position:relative;display:inline-grid;place-items:center;width:18px;height:18px;margin-left:3px;border-radius:50%;border:1px solid var(--dim);font:600 11px var(--font-body);cursor:help;color:var(--ink);text-transform:none;letter-spacing:0}
+.tipb{display:none;position:absolute;left:-6px;top:24px;z-index:6;width:min(240px,62vw);padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#061234;color:var(--ink);font:400 13px/1.4 var(--font-body);text-align:left}
+.tip:hover .tipb,.tip:focus .tipb{display:block}
+.tip:focus-visible{outline:2px solid var(--coin);outline-offset:2px}
+.panel{overflow:visible}
+.panel>.hd{border-radius:16px 16px 0 0}
+.credit{margin-top:8px;font:500 clamp(14px,2vw,18px) var(--font-body);color:var(--ink)}
+.credit b{color:var(--coin)}
+.maptitle{justify-content:space-between}
+.qmap{position:relative;width:100%;border-radius:16px;overflow:hidden;background:linear-gradient(130deg,#10195c,#2a1468 45%,#0d3a78);border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 0 70px rgba(0,0,0,.45)}
+.mapbg{position:absolute;inset:0;width:100%;height:100%}
+.mapbg .tw{animation:twk 2.2s ease-in-out infinite}
+.lvl{position:absolute;transform:translate(-50%,-50%);width:clamp(78px,11.5vw,132px);padding:0;border:0;background:none;color:#fff;cursor:pointer;display:grid;justify-items:center;gap:1px;font:inherit;transition:transform .2s cubic-bezier(.3,1.7,.5,1)}
+.lvl:hover,.lvl:focus-visible{transform:translate(-50%,-50%) scale(1.13);z-index:3}
+.lvl:focus-visible{outline:2px solid var(--coin);outline-offset:2px;border-radius:12px}
+.lvl .art{position:relative;display:block;width:clamp(56px,8vw,92px);aspect-ratio:1;animation:bob 3.4s ease-in-out infinite;animation-delay:var(--d)}
+.lvl.galx .art{width:clamp(66px,9.5vw,110px)}
+.lvl .art>svg{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 0 13px rgba(255,255,255,.34))}
+@keyframes bob{50%{transform:translateY(-7px)}}
+.gal{transform-origin:50px 50px;animation:orbit 16s linear infinite}
+.lname{font:700 clamp(11px,1.3vw,14px)/1.15 var(--font-body);text-align:center;text-shadow:0 1px 5px #000,0 0 2px #000}
+.lst{font-size:13px;line-height:1}
+.st{color:rgba(255,255,255,.28)}
+.st.on{color:#ffd24a;text-shadow:0 0 7px rgba(255,210,74,.8)}
+.lvl.locked .art>svg{filter:grayscale(1) brightness(.5)}
+.lvl.locked .lname{color:#c2cbe0}
+.lock{position:absolute;inset:0;display:grid;place-items:center}
+.lock svg{width:38%;height:38%;filter:drop-shadow(0 1px 3px #000)}
+.lvl[aria-pressed="true"] .art::after{content:"";position:absolute;inset:-9%;border:3px dashed #ffd24a;border-radius:50%;animation:orbit 7s linear infinite}
+.lvl.cur .art::before{content:"";position:absolute;inset:-3%;border-radius:50%;animation:curpulse 1.5s ease-out infinite}
+@keyframes curpulse{0%{box-shadow:0 0 0 0 rgba(95,227,161,.8)}100%{box-shadow:0 0 0 22px rgba(95,227,161,0)}}
+.nexttag{z-index:2;position:absolute;left:50%;top:-11px;transform:translateX(-50%);padding:1px 8px;border-radius:999px;background:#5fe3a1;color:#04240f;font:800 11px var(--font-body);text-transform:uppercase;letter-spacing:.05em}
+.brief{display:grid;grid-template-columns:minmax(110px,190px) minmax(0,1fr);gap:18px;align-items:center;padding:16px;border-radius:16px;background:linear-gradient(120deg,rgba(168,85,255,.26),rgba(55,208,255,.15));border:1px solid rgba(255,255,255,.22);animation:sheetin .32s ease-out both}
+.briefart svg{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 0 18px rgba(255,255,255,.3))}
+.brief.shut .briefart svg{filter:grayscale(1) brightness(.6)}
+.briefbody{gap:11px}
+.diffrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.diff{display:inline-flex;gap:3px}
+.diff i{width:15px;height:10px;border-radius:3px;background:rgba(255,255,255,.17)}
+.diff i.on{background:#5fe3a1}.diff i.warm{background:#ffd24a}.diff i.dhot{background:#ff5f6d}
+.startm{justify-self:start;border:0;padding:14px 34px;background:linear-gradient(180deg,#46e883,#14b656);color:#032211;font:800 clamp(22px,3.6vw,32px)/1 var(--font-display);letter-spacing:.04em;box-shadow:0 8px 22px rgba(40,220,110,.38)}
+.reward{display:grid;gap:6px;justify-items:center;text-align:center;padding:14px;border-radius:14px;background:rgba(255,210,74,.1);border:1px solid rgba(255,210,74,.5)}
+.bigstars{font-size:clamp(46px,9vw,74px);line-height:1;letter-spacing:.05em}
+.bigstars .st.on{animation:verdictin .6s cubic-bezier(.3,1.7,.5,1)}
+.unlockmsg{font-size:17px;color:#7ff0b6}
+@media (max-width:640px){.brief{grid-template-columns:minmax(0,1fr)}.briefart{max-width:130px}.steps button{padding:8px 10px}}
+.shake{animation:shake .5s}
+@keyframes shake{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+.verdict{animation:verdictin .55s cubic-bezier(.3,1.7,.5,1)}
+@keyframes verdictin{from{transform:scale(.5);opacity:0}}
+.spark,.conf{position:absolute;pointer-events:none}
+.spark{width:7px;height:7px;border-radius:50%;animation:spark .55s ease-out forwards}
+@keyframes spark{to{transform:translate(var(--x),var(--y)) scale(.2);opacity:0}}
+.conf{top:-20px;width:10px;height:16px;border-radius:2px;animation:conf var(--t) linear var(--d) forwards}
+@keyframes conf{to{transform:translate(var(--x),112vh) rotate(var(--r))}}
+@media (max-width:640px){.brand h1{font-size:34px}.top{align-items:flex-start}}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.spark,.conf{display:none}}
+</style>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<div id="fx" aria-hidden="true"></div>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <button type="button" class="patch" id="patch" aria-label="Spin the mission patch" title="Click to spin"><svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><linearGradient id="pbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a1d78"/><stop offset=".6" stop-color="#16225f"/><stop offset="1" stop-color="#07244a"/></linearGradient><clipPath id="pcl"><path d="M100 10L178 55V145L100 190L22 145V55Z"/></clipPath></defs><path d="M100 4L183 52V148L100 196L17 148V52Z" fill="#ffd24a"/><path d="M100 10L178 55V145L100 190L22 145V55Z" fill="url(#pbg)"/><g clip-path="url(#pcl)"><circle cx="146" cy="52" r="20" fill="#ff8a3d"/><circle cx="146" cy="52" r="29" fill="#ff8a3d" opacity=".2"/><circle cx="100" cy="236" r="104" fill="#37d0ff"/><path d="M34 165C60 145 92 148 110 164C120 176 96 190 62 190ZM128 148C150 146 172 160 180 180L138 184C126 172 118 156 128 148Z" fill="#5fe3a1"/></g><g class="twk" fill="#fff"><circle cx="54" cy="62" r="2.500"/><circle cx="160" cy="104" r="2"/></g><g class="twk b" fill="#fff"><circle cx="72" cy="38" r="2"/><circle cx="46" cy="102" r="2.500"/></g><ellipse cx="100" cy="96" rx="58" ry="58" fill="none" stroke="#ffd24a" stroke-width="1.500" stroke-dasharray="3 6" opacity=".75"/><g class="orb"><circle cx="100" cy="38" r="6" fill="#ffd24a"/><path d="M90 38H110" stroke="#fff" stroke-width="2.500"/></g><g class="ship"><path d="M94 124L100 158L106 124Z" fill="#ffb03a"/><path d="M100 54C112 68 115 92 112 122H88C85 92 88 68 100 54Z" fill="#f4f7fb" stroke="#071430" stroke-width="3" stroke-linejoin="round"/><path d="M88 102L74 128L89 122ZM112 102L126 128L111 122Z" fill="#ff6b2c" stroke="#071430" stroke-width="3" stroke-linejoin="round"/><circle cx="100" cy="86" r="7.500" fill="#37d0ff" stroke="#071430" stroke-width="3"/></g><path d="M40 146H160V170L100 188L40 170Z" fill="#ff6b2c" stroke="#ffd24a" stroke-width="2.500" stroke-linejoin="round"/><text x="100" y="164" text-anchor="middle" fill="#fff" font-family="Arial Narrow,Impact,sans-serif" font-weight="800" font-size="12.5" letter-spacing=".4">PITCH TO ORBIT</text></svg></button>
+      <div>
+        <div class="meta">Mission planning sheet · Rev A</div>
+        <h1>Pitch to Orbit</h1>
+        <p class="credit">Created by <b>Abir Nipun Jain</b></p>
+      </div>
+    </div>
+    <div class="wallet" id="wallet" role="status" aria-label="Coins"><span class="coin" aria-hidden="true"></span><b id="coins">0</b><span class="meta">coins</span></div>
+  </header>
+  <nav class="steps" id="nav" aria-label="Mission sheets"></nav>
+  <div class="track" aria-hidden="true"><i id="trackFill"></i><span id="trackRk"><svg viewBox="0 0 30 30"><g transform="rotate(90 15 15)"><path d="M15 2C20 7 21 15 19 22H11C9 15 10 7 15 2Z" fill="#f4f7fb"/><path d="M11 16L6 24L11 22ZM19 16L24 24L19 22Z" fill="#ff6b2c"/><path d="M13 22L15 29L17 22Z" fill="#ffb03a"/><circle cx="15" cy="12" r="3" fill="#37d0ff"/></g></svg></span></div>
+  <div class="layout">
+    <aside class="panel side">
+      <div class="hd"><span>Drawing A-1</span><span>Scale 1:40</span></div>
+      <div class="bd">
+        <div class="craft" id="craft"></div>
+        <dl class="spec" id="spec"></dl>
+      </div>
+    </aside>
+    <main id="sheet" class="stack"></main>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Data ---------- */
+var RESERVE = 80;
+var $ = function(s, r){ return (r || document).querySelector(s); };
+var esc = function(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+var nf = function(v){ return Math.round(v).toLocaleString('en-US'); };
+var uid = 0;
+
+var DESIGNS = {
+  capsule:   { name:'Capsule',          mass:260, cost:65, comm:2, rel:.03,  sci:1.0,  trait:'Crew-grade armour. Heavy and tough.',
+    pros:['+3% launch success','Normal science output'], cons:['260 kg needs a Kestrel or bigger beyond low Earth orbit','Weak signal (strength 2)'] },
+  probe:     { name:'Deep probe',       mass:180, cost:45, comm:5, rel:0,    sci:1.15, trait:'Big dish for long-range data.',
+    pros:['Strongest signal (strength 5)','+15% science','Light enough for a Sparrow to the Moon'], cons:['No launch success bonus'] },
+  satellite: { name:'Survey satellite', mass:140, cost:35, comm:3, rel:-.03, sci:1.25, trait:'Huge sensor wings. Lightest, but fragile.',
+    pros:['Cheapest at 35 coins','Lightest at 140 kg','Most science (+25%)'], cons:['-3% launch success','Signal too weak for the Moon without upgrades (strength 3)'] },
+  plane:     { name:'Spaceplane',       mass:340, cost:85, comm:2, rel:.05,  sci:0.9,  trait:'Tough glider. The heaviest body.',
+    pros:['Best launch success (+5%)'], cons:['Most expensive at 85 coins','Heaviest at 340 kg','Least science (-10%)','Weak signal (strength 2)'] }
+};
+var DESTS = {
+  leo:    { name:'Low Earth orbit', phrase:'low Earth orbit', dist:'about 400 km up',           blurb:'The closest and cheapest ride.',                        link:2,  f:1,   haz:.02, rad:0,   pow:0,   dv:0,  sci:20,  fit:[.95,.45,.50] },
+  moon:   { name:'The Moon',        phrase:'the Moon',        dist:'about 384,000 km away',     blurb:'Lunar orbit and a surface scan.',                      link:4,  f:2.4, haz:.08, rad:.25, pow:.2,  dv:.4, sci:45,  fit:[.45,.90,.65] },
+  mars:   { name:'Mars',            phrase:'Mars',            dist:'about 225 million km away', blurb:'Seven months of cruise through radiation and cold.',   link:8,  f:3.6, haz:.18, rad:.6,  pow:.6,  dv:.8, sci:100, fit:[.40,.70,.95] },
+  europa: { name:'Europa',          phrase:'Europa',          dist:'over 600 million km away',  blurb:"Jupiter's ice moon. Brutal radiation, little sunlight.", link:12, f:6,   haz:.30, rad:1,   pow:1,   dv:1,  sci:180, fit:[.30,.40,1.0] },
+  venus:  { name:'Venus',           phrase:'Venus',           dist:'about 40 million km away at its closest', blurb:'Crushing air and heat hot enough to melt lead.', link:6,  f:3,   haz:.13, rad:.35,pow:.1, dv:.5, sci:70,  fit:[.75,.35,.70] },
+  titan:  { name:'Titan',           phrase:'Titan',           dist:'over 1.2 billion km away',  blurb:"Saturn's giant moon, with lakes of liquid methane.", link:13, f:7,   haz:.34, rad:.8, pow:1,  dv:1,  sci:220, fit:[.35,.65,1.0] },
+  pluto:  { name:'Pluto',           phrase:'Pluto',           dist:'about 5 billion km away',   blurb:'A frozen world at the dark edge of the solar system.', link:14, f:8,   haz:.38, rad:.7, pow:1,  dv:1,  sci:260, fit:[.25,.40,1.0] },
+  milky:  { name:'Milky Way centre',phrase:'a telescope orbit studying the Milky Way centre', dist:'about 26,000 light-years away', blurb:'Your craft becomes a space telescope and studies the giant black hole at the heart of our galaxy.', link:15, f:8.5, haz:.41, rad:.8, pow:1, dv:1, sci:300, fit:[.25,.30,1.0] },
+  andromeda:{ name:'Andromeda Galaxy',phrase:'a telescope orbit studying Andromeda', dist:'about 2.5 million light-years away', blurb:'The final challenge. No craft could ever fly there, so you build the steadiest telescope ever made to study it from afar.', link:16, f:9, haz:.45, rad:1, pow:1, dv:1, sci:400, fit:[.20,.25,1.0] }
+};
+var BENEFITS = {
+  climate:   { name:'Climate monitoring', blurb:'Track ice, storms and carbon from above.',      fit:[.95,.30,.55], done:'Forecasters are using your data to warn coastal towns days earlier.' },
+  medicine:  { name:'Medical research',   blurb:'Grow proteins and tissue in near-zero gravity.',     fit:[.45,.35,.90], done:'Labs back on Earth are growing new protein crystals from your results.' },
+  internet:  { name:'Global internet',    blurb:'Connect places that have no cables.',           fit:[.50,.70,.30], done:'Remote villages are coming online through your relay.' },
+  resources: { name:'Space resources',    blurb:'Find water and metals for future missions.',    fit:[.25,.95,.45], done:'Engineers have mapped where to mine water and metal for the next fleet.' },
+  education: { name:'Inspire education',  blurb:'Put a real mission in every classroom.',        fit:[.50,.25,.85], done:'Classrooms around the world followed your mission live.' }
+};
+var SPONSORS = [
+  { id:'earth',   name:'Meridian Earth Fund', person:'Elena Marsh, Program Director', cares:'climate, weather, disaster, ocean, forest',
+    kw:['climate','earth','carbon','ice','storm','weather','flood','ocean','forest','farm','disaster','warming'],
+    lines:{ hi:'This is exactly what we fund. The planet needs eyes like this.', mid:"We like the direction. We'll back the parts we understand.", low:'A small seed grant. Show us the Earth benefit next time.', none:"We can't justify this to our donors. Not this round." } },
+  { id:'halberd', name:'Halberd Resources', person:'Marcus Halberd, CEO', cares:'resource, mining, fuel, jobs, cost, economy',
+    kw:['resource','mining','mine','metal','water','fuel','industry','jobs','economy','profit','trade','energy','cost'],
+    lines:{ hi:'A clear path to returns. Count us as your launch partner.', mid:'The numbers are fuzzy but the upside is real. Partial funding.', low:'A token investment. Show us the business case.', none:'No return, no cheque. We pass.' } },
+  { id:'lumen',   name:'Lumen Institute', person:'Dr. Amara Okafor, Chief Scientist', cares:'science, students, medicine, research, discovery',
+    kw:['science','scientist','discover','students','school','medicine','life','research','learn','cure','data','curious','education'],
+    lines:{ hi:'Brilliant. The research community will line up for this data.', mid:"Promising science. We'll fund the core experiments.", low:'A small grant to keep the idea alive.', none:"The case for discovery isn't there yet. We pass." } }
+];
+var TIERS = { hi:'Fully backed', mid:'Partly backed', low:'Seed grant', none:'Declined' };
+var PERKS = [
+  { id:'hull',     name:'Stronger craft body',    cost:30, mass:150, max:1, fx:'Tougher craft body. +3% success.' },
+  { id:'shield',   name:'Heat shield',            cost:35, mass:90,  max:1, fx:'Survives the heat of launch. +4% success.' },
+  { id:'computer', name:'Backup flight computer', cost:25, mass:25,  max:1, fx:'Reboots itself mid-flight. +3% success.' },
+  { id:'solar',    name:'Large solar arrays',     cost:30, mass:60,  max:1, fx:'More power the farther you go. Up to +6% success.' },
+  { id:'rad',      name:'Radiation shielding',    cost:45, mass:140, max:1, fx:'Matters most at Mars and Europa. Up to +8% success.' },
+  { id:'tank',     name:'Extra fuel tank',        cost:40, mass:120, max:1, fx:'Spare fuel for distant targets. Up to +6% success.' },
+  { id:'ion',      name:'Ion drive',              cost:60, mass:80,  max:1, fx:'Distant targets need 15% less extra rocket power.' },
+  { id:'antenna',  name:'High-gain antenna',      cost:25, mass:30,  max:1, fx:'+3 signal strength. More of your science reaches Earth.' },
+  { id:'xmit',     name:'Deep-space transmitter', cost:50, mass:70,  max:1, fx:'+6 signal strength. Built for Mars and Europa.' },
+  { id:'pod',      name:'Science instrument pod', cost:30, mass:45,  max:3, fx:'+30% science data per pod.' }
+];
+var ROCKETS = {
+  sparrow:   { id:'sparrow',   name:'Sparrow S1',   cost:80,  cap:450,  base:.72, blurb:'Cheap, but only light payloads.',
+    pros:['Cheapest at 80 coins','Leaves coins free for upgrades'], cons:['Lifts only 450 kg','Lowest reliability (72%)'] },
+  kestrel:   { id:'kestrel',   name:'Kestrel M3',   cost:200, cap:1500, base:.80, blurb:'The all-rounder.',
+    pros:['Handles the Moon and lighter Mars craft','Solid reliability (80%)'], cons:['Too small for a loaded Europa craft','200 coins is a big share of the budget'] },
+  leviathan: { id:'leviathan', name:'Leviathan XL', cost:400, cap:5000, base:.88, blurb:'Carries anything. Swallows your budget.',
+    pros:['Lifts 5,000 kg, so any target is possible','Best reliability (88%)'], cons:['400 coins, nearly the whole budget','Almost nothing left for upgrades'] }
+};
+var HULLS = [['#f2f5fb','White'],['#c9d3e6','Silver'],['#8fa3c7','Steel blue'],['#2c3e66','Navy'],['#f5c542','Yellow'],['#e8554a','Red'],['#4fc3a1','Teal'],['#9a7bdc','Violet']];
+var ACCS  = [['#ff6b2c','Orange'],['#ffd24a','Gold'],['#37d0ff','Cyan'],['#5fe3a1','Green'],['#ff5fa8','Pink'],['#7a8cff','Periwinkle'],['#ffffff','White'],['#1a2744','Ink']];
+var LIVERIES = [['none','Plain'],['stripe','Stripe'],['bands','Bands']];
+
+/* ---------- State ---------- */
+var START_COINS = 165; /* Priciest hull (85) still leaves 80, enough for a Sparrow. */
+function fresh(){
+  return { step:0, name:'Aurora-1', design:'probe', primary:'#f2f5fb', accent:'#ff6b2c', livery:'stripe',
+    dest:null, benefit:null, pitch:'', pitched:false, grants:[], wallet:START_COINS - DESIGNS.probe.cost,
+    perks:{}, rocket:null, launching:false, result:null, ops:null };
+}
+var state = fresh();
+
+var D = function(){ return DESIGNS[state.design]; };
+var T = function(){ return DESTS[state.dest]; };
+var qty = function(id){ return state.perks[id] || 0; };
+var mass = function(){ return D().mass + PERKS.reduce(function(s,p){ return s + p.mass * qty(p.id); }, 0); };
+var lift = function(){ return 1 + (T().f - 1) * (qty('ion') ? 0.85 : 1); };
+var need = function(){ return mass() * lift(); };
+var link = function(){ return D().comm + qty('antenna') * 3 + qty('xmit') * 6; };
+var linkShare = function(){ return Math.min(1, link() / T().link); };
+function odds(r){
+  var t = T();
+  var p = r.base + D().rel - t.haz;
+  p += qty('hull')*.03 + qty('shield')*.04 + qty('computer')*.03 + qty('solar')*(.01+.05*t.pow) + qty('rad')*(.01+.07*t.rad) + qty('tank')*.06*t.dv;
+  var u = need() / r.cap;
+  if (u > .9) p -= Math.min(.15, (u - .9) * 1.5);
+  return Math.max(.05, Math.min(.97, p));
+}
+
+/* ---------- Drawing: spacecraft ---------- */
+function craftSVG(o){
+  var P = o.perks || {}, pri = o.primary, acc = o.accent, ol = P.hull ? 5 : 2.5, ln = '#071430', id = 'h' + (++uid), metal = '#5d6b8e';
+  var G = { capsule:{top:36,bot:292,mid:210,sy:188,sh:16}, probe:{top:70,bot:270,mid:200,sy:174,sh:16}, satellite:{top:96,bot:230,mid:176,sy:150,sh:14}, plane:{top:34,bot:312,mid:214,sy:178,sh:18} }[o.design];
+  var shape = '', back = '', front = '', inClip = '';
+  var st = ' stroke="' + ln + '" stroke-width="2.5" stroke-linejoin="round"';
+  if (o.design === 'capsule') {
+    shape = '<path d="M160 36C176 36 190 76 206 170H114C130 76 144 36 160 36Z"/><rect x="112" y="170" width="96" height="84" rx="4"/>';
+    back = '<path d="M138 254H182L196 292H124Z" fill="' + metal + '"' + st + '/>';
+    front = '<circle cx="160" cy="112" r="13" fill="#0a1a3a" stroke="' + acc + '" stroke-width="3"/><circle cx="155" cy="107" r="4" fill="#9fd0ff" opacity=".7"/>';
+    inClip = '<rect x="100" y="30" width="120" height="24" fill="' + acc + '"/>';
+  } else if (o.design === 'probe') {
+    shape = '<rect x="128" y="150" width="64" height="90" rx="8"/>';
+    back = '<path d="M144 240H176L190 270H130Z" fill="' + metal + '"' + st + '/><path d="M192 176L248 132" stroke="' + ln + '" stroke-width="3" fill="none"/><circle cx="248" cy="132" r="4" fill="' + acc + '" stroke="' + ln + '" stroke-width="2"/><rect x="154" y="134" width="12" height="18" fill="' + metal + '"' + st + '/>';
+    front = '<path d="M80 100Q160 176 240 100Q160 128 80 100Z" fill="' + pri + '"' + st + '/><path d="M160 122V70" stroke="' + ln + '" stroke-width="3"/><circle cx="160" cy="68" r="6" fill="' + acc + '" stroke="' + ln + '" stroke-width="2"/>';
+  } else if (o.design === 'satellite') {
+    shape = '<rect x="128" y="126" width="64" height="84" rx="5"/>';
+    var wing = function(x){ return '<rect x="' + x + '" y="146" width="84" height="44" fill="#1f4396"' + st + '/><path d="M' + (x+21) + ' 146V190M' + (x+42) + ' 146V190M' + (x+63) + ' 146V190M' + x + ' 168H' + (x+84) + '" stroke="#6a97ec" stroke-width="1"/>'; };
+    back = '<path d="M106 168H130M214 168H190" stroke="' + ln + '" stroke-width="4"/>' + wing(22) + wing(214) + '<rect x="22" y="146" width="6" height="44" fill="' + acc + '"/><rect x="292" y="146" width="6" height="44" fill="' + acc + '"/><path d="M146 210H174L182 230H138Z" fill="' + metal + '"' + st + '/>';
+    front = '<path d="M160 126V104" stroke="' + ln + '" stroke-width="3"/><path d="M138 96Q160 124 182 96Q160 108 138 96Z" fill="' + pri + '"' + st + '/><circle cx="160" cy="146" r="6" fill="' + acc + '" stroke="' + ln + '" stroke-width="2"/>';
+  } else {
+    shape = '<path d="M160 34C172 62 176 104 178 150L276 262V284L178 264V292L160 298L142 292V264L44 284V262L142 150C144 104 148 62 160 34Z"/>';
+    back = '<path d="M146 296H174L180 314H140Z" fill="' + metal + '"' + st + '/>';
+    front = '<path d="M160 66C167 80 169 92 169 104H151C151 92 153 80 160 66Z" fill="#0a1a3a" stroke="' + acc + '" stroke-width="2.5"/>';
+    inClip = '<rect x="236" y="248" width="70" height="44" fill="' + acc + '"/><rect x="14" y="248" width="70" height="44" fill="' + acc + '"/>';
+  }
+  var liv = '';
+  if (o.livery === 'stripe') liv = '<rect x="0" y="' + G.sy + '" width="320" height="' + G.sh + '" fill="' + acc + '"/>';
+  if (o.livery === 'bands')  liv = '<rect x="0" y="' + G.sy + '" width="320" height="5" fill="' + acc + '"/><rect x="0" y="' + (G.sy + 14) + '" width="320" height="5" fill="' + acc + '"/>';
+
+  var pb = '', pf = '';
+  if (P.tank) pb += '<g fill="#cfd8ea"' + st + '><rect x="98" y="' + (G.mid - 6) + '" width="20" height="54" rx="10"/><rect x="202" y="' + (G.mid - 6) + '" width="20" height="54" rx="10"/></g>';
+  if (P.solar && o.design !== 'satellite') {
+    var sy = G.sy - 30;
+    var panel = function(x){ return '<rect x="' + x + '" y="' + sy + '" width="76" height="26" fill="#1f4396"' + st + '/><path d="M' + (x+19) + ' ' + sy + 'V' + (sy+26) + 'M' + (x+38) + ' ' + sy + 'V' + (sy+26) + 'M' + (x+57) + ' ' + sy + 'V' + (sy+26) + 'M' + x + ' ' + (sy+13) + 'H' + (x+76) + '" stroke="#6a97ec" stroke-width="1"/>'; };
+    pb += '<path d="M106 ' + (sy+13) + 'H140M214 ' + (sy+13) + 'H180" stroke="' + ln + '" stroke-width="4"/>' + panel(30) + panel(214);
+  }
+  if (P.ion) pb += '<ellipse cx="160" cy="' + (G.bot + 15) + '" rx="9" ry="15" fill="#37d0ff" opacity=".85"/><ellipse cx="160" cy="' + (G.bot + 11) + '" rx="4" ry="8" fill="#fff"/>';
+  var py = G.mid + 40;
+  var pod = function(cx, x2){ return '<path d="M' + cx + ' ' + py + 'H' + x2 + '" stroke="' + ln + '" stroke-width="4"/><rect x="' + (cx-9) + '" y="' + (py-13) + '" width="18" height="26" rx="8" fill="' + acc + '"' + st + '/><circle cx="' + cx + '" cy="' + (py-4) + '" r="3.5" fill="#0a1a3a"/>'; };
+  if (P.pod >= 1) pf += pod(92, 128);
+  if (P.pod >= 2) pf += pod(228, 192);
+  if (P.pod >= 3) pf += '<path d="M160 ' + G.top + 'V16" stroke="' + ln + '" stroke-width="3"/><circle cx="160" cy="14" r="7" fill="' + acc + '"' + st + '/>';
+  if (P.rad) pf += '<rect x="142" y="' + (G.mid - 7) + '" width="36" height="14" fill="#5a6684" stroke="' + ln + '" stroke-width="2"/><circle cx="151" cy="' + G.mid + '" r="3" fill="#ffd24a"/><circle cx="160" cy="' + G.mid + '" r="3" fill="#ffd24a"/><circle cx="169" cy="' + G.mid + '" r="3" fill="#ffd24a"/>';
+  var dish = function(d, r){ var y = G.mid - 34, x = 160 + d * 34, ex = x + d * 26, ey = y - 22; return '<path d="M' + x + ' ' + y + 'L' + ex + ' ' + ey + '" stroke="' + ln + '" stroke-width="3"/><path d="M' + (ex - r) + ' ' + (ey + d * r * .7) + 'Q' + (ex - d * r * .3) + ' ' + (ey - r * .2) + ' ' + (ex + r) + ' ' + (ey - d * r * .7) + '" fill="#e9eef9"' + st + '/>'; };
+  if (P.antenna) pf += dish(1, 14);
+  if (P.xmit) pf += dish(-1, 20);
+  if (P.shield) pf += '<path d="M66 172Q160 -128 254 172" fill="none" stroke="#ffb347" stroke-width="3" stroke-dasharray="6 6"/>';
+
+  return '<svg viewBox="0 0 320 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Spacecraft drawing"><defs><clipPath id="' + id + '">' + shape + '</clipPath></defs>' +
+    pb + back +
+    '<g fill="' + pri + '" stroke="' + ln + '" stroke-width="' + ol + '" stroke-linejoin="round">' + shape + '</g>' +
+    '<g clip-path="url(#' + id + ')">' + liv + inClip + '</g>' +
+    '<g fill="none" stroke="' + ln + '" stroke-width="' + ol + '" stroke-linejoin="round">' + shape + '</g>' +
+    front + pf + '</svg>';
+}
+
+/* ---------- Drawing: rockets ---------- */
+function rocketSVG(k, pri, acc){
+  var R = { sparrow:{w:30,h:120,b:0}, kestrel:{w:44,h:170,b:0}, leviathan:{w:56,h:215,b:1} }[k];
+  var cx = 100, bb = 280, bt = bb - R.h, fh = R.h * 0.32, y0 = bt - fh * 0.7, x1 = cx - R.w/2, x2 = cx + R.w/2;
+  var ln = '#071430', st = ' stroke="' + ln + '" stroke-width="2.5" stroke-linejoin="round"', metal = '#5d6b8e', body = '#e9eef9', ny = bb + 16, s = '';
+  if (R.b) {
+    [-1, 1].forEach(function(d){
+      var bx = cx + d * (R.w/2 + 11), bh = R.h * 0.6;
+      s += '<rect x="' + (bx-10) + '" y="' + (bb-bh) + '" width="20" height="' + bh + '" fill="' + body + '"' + st + '/>';
+      s += '<path d="M' + (bx-10) + ' ' + (bb-bh) + 'Q' + (bx-10) + ' ' + (bb-bh-22) + ' ' + bx + ' ' + (bb-bh-26) + 'Q' + (bx+10) + ' ' + (bb-bh-22) + ' ' + (bx+10) + ' ' + (bb-bh) + 'Z" fill="' + acc + '"' + st + '/>';
+      s += '<path d="M' + (bx-6) + ' ' + bb + 'H' + (bx+6) + 'L' + (bx+9) + ' ' + (bb+12) + 'H' + (bx-9) + 'Z" fill="' + metal + '"' + st + '/>';
+      s += '<g class="flame"><path d="M' + (bx-7) + ' ' + (bb+12) + 'L' + bx + ' ' + (bb+62) + 'L' + (bx+7) + ' ' + (bb+12) + 'Z" fill="#ff8a3d"/></g>';
+    });
+  }
+  s += '<path d="M' + x1 + ' ' + (bb-30) + 'L' + (x1-16) + ' ' + (bb+6) + 'L' + x1 + ' ' + bb + 'Z" fill="' + acc + '"' + st + '/>';
+  s += '<path d="M' + x2 + ' ' + (bb-30) + 'L' + (x2+16) + ' ' + (bb+6) + 'L' + x2 + ' ' + bb + 'Z" fill="' + acc + '"' + st + '/>';
+  s += '<rect x="' + x1 + '" y="' + (bt+fh) + '" width="' + R.w + '" height="' + (bb-bt-fh) + '" fill="' + body + '"' + st + '/>';
+  s += '<path d="M' + x1 + ' ' + (bt+fh) + 'V' + bt + 'Q' + x1 + ' ' + (y0+fh*0.3) + ' ' + cx + ' ' + y0 + 'Q' + x2 + ' ' + (y0+fh*0.3) + ' ' + x2 + ' ' + bt + 'V' + (bt+fh) + 'Z" fill="' + pri + '"' + st + '/>';
+  s += '<rect x="' + x1 + '" y="' + (bt+fh) + '" width="' + R.w + '" height="7" fill="' + acc + '"/>';
+  s += '<rect x="' + x1 + '" y="' + (bb-26) + '" width="' + R.w + '" height="5" fill="' + acc + '"/>';
+  s += '<path d="M' + (cx-R.w*.22) + ' ' + bb + 'H' + (cx+R.w*.22) + 'L' + (cx+R.w*.32) + ' ' + ny + 'H' + (cx-R.w*.32) + 'Z" fill="' + metal + '"' + st + '/>';
+  s += '<g class="flame"><path d="M' + (cx-R.w*.3) + ' ' + ny + 'L' + cx + ' ' + (ny+78) + 'L' + (cx+R.w*.3) + ' ' + ny + 'Z" fill="#ff8a3d"/><path d="M' + (cx-R.w*.16) + ' ' + ny + 'L' + cx + ' ' + (ny+46) + 'L' + (cx+R.w*.16) + ' ' + ny + 'Z" fill="#ffe08a"/></g>';
+  return '<svg viewBox="0 0 200 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + ROCKETS[k].name + ' rocket">' + s + '</svg>';
+}
+
+/* ---------- Chrome: header, nav, preview ---------- */
+var sheet = $('#sheet');
+function renderHead(pulse){
+  fxCoins(state.wallet);
+  if (pulse) { var w = $('#wallet'); w.classList.remove('pulse'); void w.offsetWidth; w.classList.add('pulse'); }
+}
+function renderNav(){
+  var labels = ['Map','Build','Pitch','Workshop','Launch','Operate'];
+  var locked = state.launching || !!state.result || !!state.ops;
+  $('#nav').innerHTML = labels.map(function(l, n){
+    var dis = locked || n === 5 || (n >= 1 && !state.dest) || (n > 2 && !state.pitched);
+    return '<button type="button" data-step="' + n + '"' + (state.step === n ? ' aria-current="step"' : '') + (n < state.step ? ' class="done"' : '') + (dis ? ' disabled' : '') + '><span class="meta">' + (n ? 'Sheet ' + n + ' of 5' : 'Quest') + '</span><b>' + l + '</b></button>';
+  }).join('');
+  var pos = (state.step + .5) / 6 * 100;
+  $('#trackFill').style.width = pos + '%'; $('#trackRk').style.left = pos + '%';
+}
+function installed(){
+  var names = PERKS.filter(function(p){ return qty(p.id); }).map(function(p){ return p.id === 'pod' ? 'Pods ×' + qty('pod') : p.name.split(' ').slice(0,2).join(' '); });
+  return names.length ? names.join(', ') : 'None yet';
+}
+function updatePreview(){
+  $('#craft').innerHTML = craftSVG({ design:state.design, primary:state.primary, accent:state.accent, livery:state.livery, perks:state.perks });
+  $('#spec').innerHTML =
+    '<dt>Name</dt><dd>' + esc(state.name || 'Unnamed') + '</dd>' +
+    '<dt>Design</dt><dd>' + D().name + '</dd>' +
+    '<dt>Mass</dt><dd>' + nf(mass()) + ' kg</dd>' +
+    '<dt>Target</dt><dd>' + (T() ? T().name : 'Not chosen yet') + '</dd>' +
+    '<dt>Signal</dt><dd>' + (T() ? link() + ' / ' + T().link + ' needed' : 'Strength ' + link()) + '</dd>' +
+    '<dt>Upgrades</dt><dd>' + installed() + '</dd>';
+}
+function updateMinis(){
+  document.querySelectorAll('.mini[data-design]').forEach(function(el){
+    el.innerHTML = craftSVG({ design:el.getAttribute('data-design'), primary:state.primary, accent:state.accent, livery:state.livery, perks:{} });
+  });
+}
+
+/* ---------- Sheet 1: Build ---------- */
+function swatchGroup(key, list, current){
+  var cur = current.toLowerCase();
+  var inList = list.some(function(x){ return x[0].toLowerCase() === cur; });
+  return '<div class="swatches" role="radiogroup">' + list.map(function(x){
+    return '<label class="sw" style="--c:' + x[0] + '" title="' + x[1] + '"><input type="radio" name="' + key + '" value="' + x[0] + '" aria-label="' + x[1] + '"' + (cur === x[0].toLowerCase() ? ' checked' : '') + '></label>';
+  }).join('') + '<label class="sw custom' + (inList ? '' : ' on') + '" style="--c:' + current + '" title="Custom colour"><input type="color" id="' + key + 'Custom" value="' + current + '" aria-label="Custom ' + key + ' colour"><span aria-hidden="true">+</span></label></div>';
+}
+function stepBuild(){
+  return '<section class="panel"><div class="hd"><span>Sheet 1 of 5</span><span>Craft design</span></div><div class="bd stack">' +
+    '<h2>Design your spacecraft</h2>' +
+    '<div class="field"><label for="name">Craft name</label><input type="text" id="name" maxlength="18" autocomplete="off" value="' + esc(state.name) + '"></div>' +
+    '<fieldset><legend>Design</legend><p class="note">Heavier craft cost more. You start with ' + START_COINS + ' coins, and whatever is left pays for upgrades and your rocket.</p><div class="grid">' + Object.keys(DESIGNS).map(function(k){
+      var d = DESIGNS[k], dis = state.wallet + D().cost - d.cost < RESERVE;
+      return '<label class="opt"><input type="radio" name="design" value="' + k + '"' + (state.design === k ? ' checked' : '') + (dis ? ' disabled' : '') + '><span class="mini" data-design="' + k + '"></span><b>' + d.name + '</b><span class="price">' + d.cost + ' coins</span><span class="meta">' + d.mass + ' kg body</span><span class="note">' + d.trait + (dis ? ' You cannot afford it. Remove upgrades in the workshop.' : '') + '</span>' + pcHTML(d) + '</label>';
+    }).join('') + '</div></fieldset>' +
+    '<fieldset><legend>Body colour</legend>' + swatchGroup('hull', HULLS, state.primary) + '</fieldset>' +
+    '<fieldset><legend>Accent colour</legend>' + swatchGroup('accent', ACCS, state.accent) + '</fieldset>' +
+    '<fieldset><legend>Paint style</legend><div class="grid tight">' + LIVERIES.map(function(l){
+      return '<label class="opt"><input type="radio" name="livery" value="' + l[0] + '"' + (state.livery === l[0] ? ' checked' : '') + '><b>' + l[1] + '</b></label>';
+    }).join('') + '</div></fieldset>' +
+    '<div class="row"><button type="button" class="btn primary" data-go="2">Continue to the pitch</button></div>' +
+    '</div></section>';
+}
+
+/* ---------- Sponsor portraits ---------- */
+function avatarSVG(id, mood){
+  var cid = 'a' + (++uid);
+  var cfg = {
+    earth: {
+      bg:'#17566b', skin:'#f1c7a1',
+      back:'<circle cx="48" cy="17" r="10" fill="#a8481f"/>',
+      body:'<path d="M6 96C6 76 26 68 48 68C70 68 90 76 90 96Z" fill="#2f9e6e"/><path d="M37 68L48 84L59 68Z" fill="#f4f7fb"/><circle cx="68" cy="80" r="3.5" fill="#ffd24a"/>',
+      hair:'<path d="M30 46C27 24 38 19 48 19C58 19 69 24 66 46C63 36 58 31 48 31C38 31 33 36 30 46Z" fill="#a8481f"/>',
+      extra:''
+    },
+    halberd: {
+      bg:'#6b3d1f', skin:'#a8714e',
+      back:'',
+      body:'<path d="M6 96C6 76 26 68 48 68C70 68 90 76 90 96Z" fill="#26344f"/><path d="M38 68L48 80L58 68Z" fill="#f4f7fb"/><path d="M46 72H50L52 88L48 93L44 88Z" fill="#ff6b2c"/>',
+      hair:'<path d="M31 50C31 66 40 71 48 71C56 71 65 66 65 50C62 58 56 61 48 61C40 61 34 58 31 50Z" fill="#c9ccd4"/><path d="M29 38C29 22 38 15 48 15C58 15 67 22 67 38Z" fill="#ffd24a"/><rect x="25" y="36" width="46" height="6" rx="3" fill="#f0b82c"/><rect x="45" y="15" width="6" height="20" fill="#e6a91f"/>',
+      extra:''
+    },
+    lumen: {
+      bg:'#3b2f7a', skin:'#7a4a2e',
+      back:'<path d="M26 50C22 28 34 18 48 18C62 18 74 28 70 50C70 62 66 67 64 67L32 67C30 67 26 62 26 50Z" fill="#1b1418"/>',
+      body:'<path d="M6 96C6 76 26 68 48 68C70 68 90 76 90 96Z" fill="#f4f7fb"/><path d="M38 68L48 86L58 68Z" fill="#7a8cff"/><path d="M48 86V96" stroke="#c9d3e6" stroke-width="2"/>',
+      hair:'<path d="M30 41C32 28 40 24 48 24C58 24 64 30 66 41C58 34 40 34 30 41Z" fill="#1b1418"/>',
+      extra:'<circle cx="40" cy="46" r="6.5" fill="none" stroke="#e8c24a" stroke-width="2"/><circle cx="56" cy="46" r="6.5" fill="none" stroke="#e8c24a" stroke-width="2"/><path d="M46.5 46H49.5" stroke="#e8c24a" stroke-width="2"/>'
+    }
+  }[id];
+  var ink = '#1b1418', lip = '#3a1f18', mouth, brows;
+  if (mood === 'hi') mouth = '<path d="M40 55Q48 65 56 55Z" fill="#fff" stroke="' + lip + '" stroke-width="2" stroke-linejoin="round"/>';
+  else if (mood === 'mid') mouth = '<path d="M41 55Q48 60 55 55" fill="none" stroke="' + lip + '" stroke-width="2.2" stroke-linecap="round"/>';
+  else if (mood === 'none') mouth = '<path d="M41 59Q48 53 55 59" fill="none" stroke="' + lip + '" stroke-width="2.2" stroke-linecap="round"/>';
+  else mouth = '<path d="M42 57H54" fill="none" stroke="' + lip + '" stroke-width="2.2" stroke-linecap="round"/>';
+  if (mood === 'none') brows = '<path d="M35 37L45 41M61 37L51 41" stroke="' + ink + '" stroke-width="2.4" stroke-linecap="round" fill="none"/>';
+  else if (mood === 'hi') brows = '<path d="M35 38Q40 33 45 37M51 37Q56 33 61 38" stroke="' + ink + '" stroke-width="2.4" stroke-linecap="round" fill="none"/>';
+  else brows = '<path d="M35 38Q40 36 45 38M51 38Q56 36 61 38" stroke="' + ink + '" stroke-width="2.4" stroke-linecap="round" fill="none"/>';
+  return '<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Portrait of the sponsor"><defs><clipPath id="' + cid + '"><circle cx="48" cy="48" r="48"/></clipPath></defs>' +
+    '<g clip-path="url(#' + cid + ')"><rect width="96" height="96" fill="' + cfg.bg + '"/>' + cfg.back + cfg.body +
+    '<rect x="42" y="60" width="12" height="12" fill="' + cfg.skin + '"/><ellipse cx="48" cy="46" rx="17" ry="20" fill="' + cfg.skin + '"/><ellipse cx="31" cy="48" rx="3" ry="5" fill="' + cfg.skin + '"/><ellipse cx="65" cy="48" rx="3" ry="5" fill="' + cfg.skin + '"/>' +
+    cfg.hair + '<circle cx="41" cy="46" r="2.4" fill="' + ink + '"/><circle cx="55" cy="46" r="2.4" fill="' + ink + '"/>' + brows + '<path d="M48 48Q50 52 48 53" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="1.6" stroke-linecap="round"/>' + mouth + cfg.extra + '</g></svg>';
+}
+
+/* ---------- Sheet 2: Pitch ---------- */
+function sponsorsHTML(){
+  return SPONSORS.map(function(s, i){
+    var g = state.grants[i];
+    return '<div class="sponsor' + (g ? ' t-' + g.tier : '') + '" style="--d:' + (i * .25) + 's"><div class="who"><div class="avatar">' + avatarSVG(s.id, g ? g.tier : 'wait') + '</div><div><div class="sname">' + s.name + '</div><div class="meta">' + s.person + '</div></div></div><div class="meta">Cares about: ' + s.cares + '</div>' +
+      (g ? '<p class="quote">“' + g.line + '”</p><div class="grant"><span class="meta">' + TIERS[g.tier] + '</span><b>' + (g.coins ? '+' + g.coins + ' coins' : 'No coins') + '</b></div>' : '<p class="note">Waiting for your pitch.</p>') + '</div>';
+  }).join('');
+}
+function stepPitch(){
+  var p = state.pitched, total = state.grants.reduce(function(s, g){ return s + g.coins; }, 0);
+  return '<section class="panel"><div class="hd"><span>Sheet 2 of 5</span><span>Sponsor pitch</span></div><div class="bd stack">' +
+    '<h2>Pitch ' + esc(state.name || 'your craft') + '</h2>' +
+    '<div class="summary"><b>Mission target: ' + T().name + '.</b> ' + T().blurb + '</div>' +
+    '<div class="grid" id="sponsors">' + sponsorsHTML() + '</div>' +
+    '<fieldset' + (p ? ' disabled' : '') + ' class="stack">' +
+      '<fieldset><legend>How does it help the world?</legend><div class="grid">' + Object.keys(BENEFITS).map(function(k){
+        var b = BENEFITS[k];
+        return '<label class="opt"><input type="radio" name="benefit" value="' + k + '"' + (state.benefit === k ? ' checked' : '') + '><b>' + b.name + '</b><span class="note">' + b.blurb + '</span></label>';
+      }).join('') + '</div></fieldset>' +
+      '<div class="field"><label for="pitch">Your pitch</label><textarea id="pitch" maxlength="280" placeholder="Explain what your mission will do and who it helps.">' + esc(state.pitch) + '</textarea><div class="count"><span id="pc">' + state.pitch.length + '</span>/280</div><p class="note">Sponsors listen for the words they care about. Aim for 150 characters or more.</p></div>' +
+    '</fieldset>' +
+    (p
+      ? '<div class="summary">Sponsors granted <b class="num">' + nf(total) + ' coins</b>. Your wallet holds <b class="num">' + nf(state.wallet) + ' coins</b>.</div><div class="row"><button type="button" class="btn primary" data-go="3">Continue to the workshop</button></div>'
+      : '<div class="row"><button type="button" class="btn primary" id="deliver" data-act="pitch"' + (pitchReady() ? '' : ' disabled') + '>Deliver the pitch</button><span class="note" id="deliverNote">' + pitchHint() + '</span></div>') +
+    '</div></section>';
+}
+function pitchReady(){ return !!state.dest && !!state.benefit && state.pitch.trim().length > 0; }
+function pitchHint(){ return pitchReady() ? 'You pitch once. Choose carefully.' : 'Choose a benefit, then write your pitch.'; }
+function updatePitchBtn(){
+  var b = $('#deliver'); if (!b) return;
+  b.disabled = !pitchReady(); $('#deliverNote').textContent = pitchHint();
+}
+function deliverPitch(){
+  if (!pitchReady() || state.pitched) return;
+  var text = state.pitch.toLowerCase(), len = state.pitch.trim().length, q = len < 40 ? 0 : Math.min(1, len / 150), total = 0;
+  state.grants = SPONSORS.map(function(s, i){
+    var hits = s.kw.filter(function(k){ return text.indexOf(k) > -1; }).length;
+    var sc = .36 * BENEFITS[state.benefit].fit[i] + .24 * DESTS[state.dest].fit[i] + .24 * Math.min(1, hits / 3) + .16 * q + (Math.random() * .1 - .05);
+    sc = Math.max(0, Math.min(1, sc));
+    var tier = sc >= .7 ? 'hi' : sc >= .5 ? 'mid' : sc >= .35 ? 'low' : 'none';
+    var coins = tier === 'none' ? 0 : Math.round(sc * 140 / 5) * 5;
+    total += coins;
+    return { id:s.id, coins:coins, tier:tier, line:s.lines[tier] };
+  });
+  state.wallet += total;
+  state.pitched = true;
+  renderNav(); renderHead(true); renderStep();
+}
+
+/* ---------- Sheet 3: Workshop ---------- */
+function fitHTML(){
+  var f = lift(), m = mass();
+  return '<div class="tablewrap"><table class="fit"><thead><tr><th>Rocket</th><th>Max craft mass to ' + T().phrase + '</th><th>Your craft</th></tr></thead><tbody>' +
+    Object.keys(ROCKETS).map(function(k){
+      var r = ROCKETS[k], mx = r.cap / f, ok = m <= mx;
+      return '<tr><td>' + r.name + '</td><td class="num">' + nf(mx) + ' kg</td><td class="' + (ok ? 'okc' : 'badc') + '">' + (ok ? 'Fits' : 'Too heavy') + ' (' + nf(m) + ' kg)</td></tr>';
+    }).join('') + '</tbody></table></div>' + linkHTML();
+}
+function tip(text){ return '<span class="tip" tabindex="0" aria-label="' + esc(text) + '">?<span class="tipb" role="tooltip">' + esc(text) + '</span></span>'; }
+function linkHTML(){
+  var l = link(), n = T().link, sh = linkShare();
+  return '<div class="field linkbox"><div class="row" style="justify-content:space-between"><span class="meta">Signal strength (comms) to ' + T().phrase + ' ' + tip('Comms means communications: how your craft sends data and messages back to Earth.') + '</span><span class="num">' + l + ' / ' + n + ' needed</span></div><div class="bar ' + (sh < 1 ? 'warn' : '') + '"><i style="width:' + Math.round(sh * 100) + '%"></i></div><p class="note">' + (sh < 1 ? 'Weak signal. At most ' + Math.round(sh * 100) + '% of your science can reach Earth.' : 'Strong signal. All your science can reach Earth.') + '</p></div>';
+}
+function perksHTML(){
+  return PERKS.map(function(p){
+    var n = qty(p.id), canAdd = n < p.max && state.wallet - p.cost >= RESERVE;
+    var ctl = p.max === 1
+      ? (n ? '<button type="button" class="btn" data-act="perk-sub" data-id="' + p.id + '">Remove</button>' : '<button type="button" class="btn primary" data-act="perk-add" data-id="' + p.id + '"' + (canAdd ? '' : ' disabled') + '>Install</button>')
+      : '<button type="button" class="btn qbtn" data-act="perk-sub" data-id="' + p.id + '" aria-label="Remove one ' + p.name + '"' + (n ? '' : ' disabled') + '>−</button><span class="qty" aria-live="polite">' + n + '</span><button type="button" class="btn qbtn" data-act="perk-add" data-id="' + p.id + '" aria-label="Add one ' + p.name + '"' + (canAdd ? '' : ' disabled') + '>+</button>';
+    return '<div class="perk"><div><div class="nm">' + p.name + '</div><div class="note">' + p.fx + '</div><div class="chips"><span class="chip">+' + p.mass + ' kg</span><span class="chip coin">' + p.cost + ' coins</span></div></div><div class="ctl">' + ctl + '</div></div>';
+  }).join('');
+}
+function stepWorkshop(){
+  return '<section class="panel"><div class="hd"><span>Sheet 3 of 5</span><span>Workshop</span></div><div class="bd stack">' +
+    '<h2>Upgrade the craft</h2>' +
+    '<p class="note">Every upgrade adds mass and costs coins. Heavier craft need bigger rockets, and rockets cost coins too: Sparrow 80, Kestrel 200, Leviathan 400. The workshop keeps ' + RESERVE + ' coins in reserve so you can always afford a launch.</p>' +
+    '<div id="fit">' + fitHTML() + '</div>' +
+    '<div id="perks">' + perksHTML() + '</div>' +
+    '<div class="row"><button type="button" class="btn primary" data-go="4">Continue to the launch pad</button></div>' +
+    '</div></section>';
+}
+function refreshWorkshop(focusSel){
+  $('#fit').innerHTML = fitHTML();
+  $('#perks').innerHTML = perksHTML();
+  renderHead(); updatePreview();
+  if (focusSel) { var el = $(focusSel); if (el && !el.disabled) el.focus(); else { var any = $('#perks button:not(:disabled)'); if (any) any.focus(); } }
+}
+
+/* ---------- Sheet 4: Launch ---------- */
+function pcHTML(r){
+  var up = '<svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 22V6M6 12l7-7 7 7" fill="none" stroke="#5fe3a1" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var dn = '<svg viewBox="0 0 26 26" aria-hidden="true"><path d="M13 4V20M6 14l7 7 7-7" fill="none" stroke="#ff6b72" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var items = function(a){ return a.map(function(x){ return '<span class="it">' + x + '</span>'; }).join(''); };
+  return '<span class="pc"><span class="blk up">' + up + '<span><span class="lab">Pros</span>' + items(r.pros) + '</span></span><span class="blk down">' + dn + '<span><span class="lab">Cons</span>' + items(r.cons) + '</span></span></span>';
+}
+function stepLaunch(){
+  if (!state.rocket || ROCKETS[state.rocket].cost > state.wallet) state.rocket = ROCKETS.kestrel.cost <= state.wallet ? 'kestrel' : 'sparrow';
+  return '<section class="panel"><div class="hd"><span>Sheet 4 of 5</span><span>Launch pad</span></div><div class="bd stack">' +
+    '<h2>Choose a rocket and launch</h2>' +
+    '<fieldset id="rockets"><legend>Rocket</legend><div class="grid">' + Object.keys(ROCKETS).map(function(k){
+      var r = ROCKETS[k], dis = r.cost > state.wallet;
+      return '<label class="opt rocketcard"><input type="radio" name="rocket" value="' + k + '"' + (state.rocket === k ? ' checked' : '') + (dis ? ' disabled' : '') + '><b>' + r.name + '</b><span class="price">' + r.cost + ' coins</span><span class="stats meta"><span>Lifts ' + nf(r.cap) + ' kg</span><span>Base ' + Math.round(r.base * 100) + '%</span></span><span class="note">' + r.blurb + (dis ? ' You cannot afford it. Remove upgrades in the workshop.' : '') + '</span>' + pcHTML(r) + '</label>';
+    }).join('') + '</div></fieldset>' +
+    '<div id="ready" class="stack"></div>' +
+    '<div class="stage" id="stage"><canvas id="launchCv" role="img" aria-label="Your rocket on the launch pad"></canvas><div class="count" id="count">Ready</div><div class="callout" id="callout" aria-live="polite">On the pad. All systems ready.</div><div class="tele" id="tele" aria-hidden="true" hidden></div><button type="button" class="btn skipbtn" id="skipfly" data-act="skip" hidden>Skip</button></div>' +
+    '<div class="row" id="launchrow"><button type="button" class="btn primary" id="launchbtn" data-act="launch">Launch</button><button type="button" class="btn" data-go="3">Back to workshop</button></div>' +
+    '<div id="result" aria-live="polite"></div>' +
+    '</div></section>';
+}
+function updateLaunchView(){
+  var r = ROCKETS[state.rocket]; if (!r) return;
+  lsDrawStill();
+  var n = need(), u = n / r.cap, p = odds(r), over = u > 1, cls = over ? 'bad' : u > .9 ? 'warn' : '';
+  $('#ready').innerHTML =
+    '<div class="field"><div class="row" style="justify-content:space-between"><span class="meta">Rocket power needed to reach ' + T().phrase + ' ' + tip('Lift is the rocket power needed to carry your craft. Farther targets need much more.') + '</span><span class="num">' + nf(n) + ' / ' + nf(r.cap) + ' kg</span></div><div class="bar ' + cls + '"><i style="width:' + Math.min(100, u * 100) + '%"></i></div><p class="note">' + (over ? 'Overweight. This craft will not clear the pad on the ' + r.name + '.' : u > .9 ? 'Tight margin. The rocket is working near its limit.' : 'Comfortable margin.') + '</p></div>' +
+    linkHTML() +
+    '<div class="row" style="justify-content:space-between"><div><div class="meta">Estimated success</div><div class="odds">' + (over ? '0' : Math.round(p * 100)) + '%</div></div><div class="note">Wallet after launch: <b class="num">' + nf(state.wallet - r.cost) + ' coins</b></div></div>';
+}
+/* ---------- Failure scenes ---------- */
+var FAIL_TITLES = { weight:'Overweight liftoff', heat:'Burned up during launch', computer:'Flight computer lock-up', rad:'Radiation damage', power:'Power loss', fuel:'Out of fuel', rocket:'Engine failure during launch' };
+function grad(id, type, stops, attrs){
+  return '<' + type + 'Gradient id="' + id + '" ' + attrs + '>' + stops.map(function(s){ return '<stop offset="' + s[0] + '" stop-color="' + s[1] + '"' + (s[2] !== undefined ? ' stop-opacity="' + s[2] + '"' : '') + '/>'; }).join('') + '</' + type + 'Gradient>';
+}
+function nest(str, x, y, w, h, rot){
+  var s = str.replace('<svg ', '<svg x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" overflow="visible" ');
+  return rot ? '<g transform="rotate(' + rot + ' ' + (x + w / 2) + ' ' + (y + h / 2) + ')">' + s + '</g>' : s;
+}
+function myCraft(x, y, w, h, rot){ return nest(craftSVG({ design:state.design, primary:state.primary, accent:state.accent, livery:state.livery, perks:state.perks }), x, y, w, h, rot); }
+function myRocket(x, y, w, h, rot){ return nest(rocketSVG(state.rocket, state.primary, state.accent), x, y, w, h, rot); }
+function frag(x, y, r, s, fill){ return '<path d="M0 0L' + (14*s) + ' ' + (-5*s) + 'L' + (4*s) + ' ' + (11*s) + 'Z" transform="translate(' + x + ' ' + y + ') rotate(' + r + ')" fill="' + fill + '" stroke="#071430" stroke-width="1.5"/>'; }
+function spark(x, y, s){ return '<path d="M' + x + ' ' + (y-6*s) + 'L' + (x+1.6*s) + ' ' + (y-1.6*s) + 'L' + (x+6*s) + ' ' + y + 'L' + (x+1.6*s) + ' ' + (y+1.6*s) + 'L' + x + ' ' + (y+6*s) + 'L' + (x-1.6*s) + ' ' + (y+1.6*s) + 'L' + (x-6*s) + ' ' + y + 'L' + (x-1.6*s) + ' ' + (y-1.6*s) + 'Z" fill="#ffe27a"/>'; }
+function failScene(c){
+  var g = 'f' + (++uid), d = state.dest, body = '', i;
+  var planet = { leo:'#2a6fd1', moon:'#b3b3ba', venus:'#e6b35c', mars:'#c1583a', europa:'#d7ecf5', titan:'#d99a3c', pluto:'#cdb9a6', milky:'#6a4bb8', andromeda:'#b0509a' }[d];
+  var mono = ' font-family="IBM Plex Mono, ui-monospace, monospace"';
+  var stars = '';
+  for (i = 0; i < 46; i++) stars += '<circle cx="' + ((i * 97) % 480) + '" cy="' + ((i * 53) % 270) + '" r="' + (i % 4 ? .8 : 1.5) + '" fill="#fff" opacity="' + (.35 + (i % 5) * .13) + '"/>';
+  var V = 'x1="0" y1="0" x2="0" y2="1"';
+  var pri = state.primary;
+  if (c === 'weight') {
+    body = '<defs>' + grad(g+'a','linear',[[0,'#3a2a5c'],[.6,'#e8845a'],[1,'#ffd08a']],V) + grad(g+'b','linear',[[0,'#14507f'],[1,'#06203a']],V) + '</defs>' +
+      '<rect width="480" height="270" fill="url(#' + g + 'a)"/><circle cx="390" cy="168" r="46" fill="#ffe7b0" opacity=".85"/><rect y="168" width="480" height="102" fill="url(#' + g + 'b)"/>' +
+      '<path d="M0 192Q30 184 60 192T120 192T180 192T240 192T300 192T360 192T420 192T480 192" fill="none" stroke="#7fb3d9" stroke-width="2" opacity=".45"/>' +
+      '<path d="M0 224Q30 216 60 224T120 224T180 224T240 224T300 224T360 224T420 224T480 224" fill="none" stroke="#7fb3d9" stroke-width="2" opacity=".3"/>' +
+      '<path d="M60 20C130 40 170 90 262 140" fill="none" stroke="#eceff4" stroke-opacity=".55" stroke-width="16" stroke-linecap="round"/>' +
+      '<path d="M40 62C120 72 170 102 250 152" fill="none" stroke="#c9ced8" stroke-opacity=".4" stroke-width="10" stroke-linecap="round"/>' +
+      myRocket(268, 84, 62, 118, 160) +
+      '<ellipse cx="340" cy="184" rx="44" ry="9" fill="#fff" opacity=".8"/><ellipse cx="340" cy="176" rx="22" ry="14" fill="#e9f4fb" opacity=".85"/>' +
+      '<circle cx="306" cy="164" r="4" fill="#fff" opacity=".8"/><circle cx="372" cy="168" r="5" fill="#fff" opacity=".8"/><circle cx="356" cy="150" r="3" fill="#fff" opacity=".8"/>';
+  } else if (c === 'heat') {
+    body = '<defs>' + grad(g+'a','linear',[[0,'#050a1f'],[.7,'#14246a'],[1,'#2d63c4']],V) + grad(g+'f','radial',[[0,'#fff6c0'],[.3,'#ffb23e'],[.65,'#ff5a1f',.8],[1,'#ff3b1f',0]],'') + '</defs>' +
+      '<rect width="480" height="270" fill="url(#' + g + 'a)"/>' + stars +
+      '<ellipse cx="240" cy="340" rx="440" ry="130" fill="#2a6fd1"/><ellipse cx="240" cy="352" rx="440" ry="130" fill="#143b82"/>' +
+      '<circle cx="262" cy="118" r="120" fill="url(#' + g + 'f)"/>';
+    for (i = 0; i < 9; i++) body += '<path d="M' + (150 - i * 14) + ' ' + (10 + i * 18) + 'L' + (240 + i * 3) + ' ' + (105 + i * 3) + '" stroke="' + (i % 2 ? '#ffd24a' : '#ff7a2f') + '" stroke-width="' + (3 + i % 3) + '" stroke-linecap="round" opacity=".7"/>';
+    body += myCraft(205, 62, 112, 122, -28) + frag(150, 170, 30, 1.3, pri) + frag(330, 80, 200, 1.1, pri) + frag(360, 170, 80, 1.5, '#5d6b8e') + frag(120, 110, 140, 1, '#5d6b8e') + frag(300, 210, 20, 1.2, pri) + frag(190, 40, 260, 1, pri);
+  } else if (c === 'computer') {
+    body = '<rect width="480" height="270" fill="#0a1226"/>' +
+      '<rect x="80" y="26" width="320" height="140" fill="#04081a" stroke="#3b5ea8" stroke-width="4"/>' +
+      '<path d="M96 100H168L182 60L196 138L208 100H384" fill="none" stroke="#ff6b72" stroke-width="3"/>' +
+      '<text x="240" y="50" text-anchor="middle" fill="#ff6b72" font-size="15"' + mono + '>SIGNAL LOST</text>' +
+      '<text x="96" y="154" fill="#9db7e6" font-size="11"' + mono + '>' + esc(state.name || 'CRAFT') + ' · T+00:07:42</text>' +
+      '<rect y="196" width="480" height="74" fill="#101c42"/><rect x="40" y="190" width="150" height="12" fill="#1b2d66"/><rect x="290" y="190" width="150" height="12" fill="#1b2d66"/>' +
+      '<circle cx="115" cy="206" r="15" fill="#060a18"/><path d="M80 270Q115 222 150 270Z" fill="#060a18"/>' +
+      '<circle cx="365" cy="206" r="15" fill="#060a18"/><path d="M330 270Q365 222 400 270Z" fill="#060a18"/>';
+  } else if (c === 'rad') {
+    body = '<defs>' + grad(g+'a','linear',[[0,'#02040e'],[1,'#0a1640']],V) + '</defs><rect width="480" height="270" fill="url(#' + g + 'a)"/>' + stars +
+      '<circle cx="450" cy="320" r="170" fill="' + planet + '"/><circle cx="450" cy="320" r="170" fill="none" stroke="#fff" stroke-opacity=".15" stroke-width="6"/>';
+    for (i = 0; i < 14; i++) body += '<path d="M' + (20 + i * 34) + ' -10L' + (110 + i * 34) + ' 280" stroke="' + (i % 3 ? '#ffe27a' : '#ffffff') + '" stroke-width="' + (1.5 + i % 3) + '" opacity="' + (.35 + (i % 4) * .15) + '"/>';
+    body += myCraft(165, 52, 128, 140, 8) + spark(190, 100, 2.2) + spark(262, 78, 1.6) + spark(240, 168, 2) + spark(176, 168, 1.3) +
+      '<path d="M420 30L452 86H388Z" fill="#ffd24a" stroke="#1a1200" stroke-width="3" stroke-linejoin="round"/><text x="420" y="78" text-anchor="middle" fill="#1a1200" font-size="30" font-weight="700"' + mono + '>!</text>';
+  } else if (c === 'power') {
+    var au = { leo:1, moon:1, venus:.72, mars:1.52, europa:5.2, titan:9.5, pluto:39.5, milky:1, andromeda:1 }[d], pct = Math.round(100 / (au * au));
+    body = '<rect width="480" height="270" fill="#02050f"/>' + stars + '<circle cx="48" cy="52" r="22" fill="#fff" opacity=".1"/><circle cx="48" cy="52" r="5" fill="#fff"/>' +
+      myCraft(168, 58, 144, 158, 0) + '<rect width="480" height="270" fill="#02050f" opacity=".38"/>' +
+      '<text x="20" y="96" fill="#9db7e6" font-size="11"' + mono + '>SUNLIGHT HERE: ' + pct + '% OF EARTH</text>' +
+      '<rect x="372" y="28" width="70" height="30" rx="4" fill="none" stroke="#ff6b72" stroke-width="3"/><rect x="442" y="36" width="6" height="14" fill="#ff6b72"/><rect x="376" y="32" width="6" height="22" fill="#ff6b72"/>' +
+      '<text x="407" y="78" text-anchor="middle" fill="#ff6b72" font-size="13"' + mono + '>BATTERY 0%</text>';
+  } else if (c === 'fuel') {
+    body = '<rect width="480" height="270" fill="#02050f"/>' + stars +
+      '<circle cx="420" cy="140" r="132" fill="' + planet + '"/><circle cx="388" cy="108" r="132" fill="#fff" opacity=".07"/><circle cx="420" cy="140" r="132" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="8"/>' +
+      '<path d="M170 176C230 150 270 140 292 132" fill="none" stroke="#9db7e6" stroke-width="2" stroke-dasharray="3 7" opacity=".5"/>' +
+      '<path d="M10 236C60 220 110 196 150 176" fill="none" stroke="#9db7e6" stroke-width="2" stroke-dasharray="6 5"/>' +
+      myCraft(112, 128, 80, 88, 65) +
+      '<rect x="20" y="212" width="132" height="16" fill="none" stroke="#ff6b72" stroke-width="2"/><rect x="22" y="214" width="6" height="12" fill="#ff6b72"/>' +
+      '<text x="20" y="246" fill="#ff6b72" font-size="12"' + mono + '>FUEL EMPTY</text>' +
+      '<text x="20" y="30" fill="#9db7e6" font-size="11"' + mono + '>TARGET: ' + DESTS[d].name.toUpperCase() + '</text>';
+  } else {
+    body = '<defs>' + grad(g+'a','linear',[[0,'#1c1f3a'],[.6,'#7a3a3a'],[1,'#e89a5a']],V) + grad(g+'f','radial',[[0,'#ffffff'],[.25,'#ffe08a'],[.55,'#ff7a2f',.9],[1,'#ff3b1f',0]],'') + '</defs>' +
+      '<rect width="480" height="270" fill="url(#' + g + 'a)"/><rect y="196" width="480" height="74" fill="#14151f"/><rect x="170" y="190" width="150" height="10" fill="#2e3347"/>' +
+      '<rect x="70" y="56" width="16" height="140" fill="#2e3347"/><rect x="132" y="56" width="10" height="140" fill="#2e3347"/><path d="M86 70L132 110M132 70L86 110M86 120L132 160M132 120L86 160M86 56H132" stroke="#4a516b" stroke-width="3" fill="none"/>' +
+      '<circle cx="190" cy="168" r="38" fill="#8a8794" opacity=".6"/><circle cx="310" cy="150" r="50" fill="#8a8794" opacity=".55"/><circle cx="350" cy="190" r="40" fill="#6d6a78" opacity=".6"/>' +
+      myRocket(215, 84, 62, 124, -12) +
+      '<circle cx="246" cy="176" r="80" fill="url(#' + g + 'f)"/>' +
+      frag(170, 120, 40, 1.3, pri) + frag(330, 100, 220, 1.2, '#e9eef9') + frag(380, 150, 100, 1.1, '#5d6b8e') + frag(150, 170, 300, 1, '#e9eef9');
+  }
+  return '<svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + FAIL_TITLES[c] + '"><defs>' + grad(g + 'v', 'radial', [[.55, '#000', 0], [1, '#000', .55]], '') + '</defs>' + body + '<rect width="480" height="270" fill="url(#' + g + 'v)"/></svg>';
+}
+function pickCause(){
+  var t = T();
+  var w = [['heat', qty('shield') ? .6 : 3], ['computer', qty('computer') ? .4 : 2], ['rad', (qty('rad') ? .2 : 2.5) * t.rad + .001], ['power', (qty('solar') ? .2 : 2) * t.pow + .001], ['fuel', (qty('tank') ? .2 : 2) * t.dv + .001], ['rocket', 2]];
+  var sum = w.reduce(function(s, x){ return s + x[1]; }, 0), r = Math.random() * sum;
+  for (var i = 0; i < w.length; i++) { r -= w[i][1]; if (r <= 0) return w[i][0]; }
+  return 'rocket';
+}
+function runMission(){
+  var r = ROCKETS[state.rocket], t = T(), nm = state.name || 'Your craft', p = odds(r);
+  if (need() > r.cap) {
+    return { ok:false, cause:'weight', odds:0, roll:null, msg:'Failure! ' + nm + ' was too heavy for the ' + r.name + '. It struggled off the pad, then crashed into the ocean.', tip:'Pick a bigger rocket or remove modules.' };
+  }
+  var roll = Math.random();
+  if (roll < p) {
+    return { ok:true, odds:p, roll:roll };
+  }
+  var c = pickCause();
+  var M = {
+    heat:     ['burned up during launch. The craft was not protected from the heat.', 'A heat shield protects the craft during launch.'],
+    computer: ['lost contact after its only flight computer froze mid-burn.', 'A backup flight computer would have saved it.'],
+    rad:      ['was fried by radiation on the way to ' + t.phrase + '.', 'Radiation shielding matters most at Mars and Europa.'],
+    power:    ['ran out of power far from the Sun.', 'Large solar arrays help on distant missions.'],
+    fuel:     ['ran out of fuel before reaching ' + t.phrase + '.', 'An extra fuel tank or an ion drive helps on long trips.'],
+    rocket:   ['was lost when the ' + r.name + ' had an engine failure and exploded during launch.', 'Bigger rockets are more reliable. Staying well under the rocket limit helps too.']
+  }[c];
+  return { ok:false, cause:c, odds:p, roll:roll, msg:'Failure! ' + nm + ' ' + M[0], tip:M[1] };
+}
+function launch(){
+  var r = ROCKETS[state.rocket];
+  if (!r || state.launching || state.result || r.cost > state.wallet) return;
+  state.launching = true; state.wallet -= r.cost;
+  renderHead(); renderNav();
+  $('#launchbtn').disabled = true;
+  $('#rockets').disabled = true;
+  document.querySelectorAll('#launchrow .btn').forEach(function(b){ b.disabled = true; });
+  lsStart(finish);
+}
+function finish(){
+  lsStop();
+  var res = runMission();
+  state.launching = false;
+  if (res.ok) {
+    state.ops = startOps(res); state.step = 5;
+    renderNav(); renderStep(); window.scrollTo({ top:0, behavior:'smooth' });
+    return;
+  }
+  state.result = res;
+  renderNav();
+  $('#count').textContent = 'Mission lost';
+  $('#launchrow').hidden = true;
+  $('#result').innerHTML = resultHTML(res);
+  fxShake();
+  $('#result').scrollIntoView({ block:'nearest', behavior:'smooth' });
+}
+function resultHTML(res){
+  var r = ROCKETS[state.rocket], o = state.ops;
+  return '<div class="result ' + (res.ok ? 'ok' : 'bad') + '"><div class="verdict">' + (res.ok ? 'Success' : 'Failure') + '</div><p class="msg">' + esc(res.msg) + '</p>' +
+    (!res.ok && FAIL_TITLES[res.cause] ? '<figure class="scene">' + failScene(res.cause) + '<figcaption>Incident scene · ' + FAIL_TITLES[res.cause] + '</figcaption></figure>' : '') +
+    (res.ok ? impactHTML(res) : '<p class="note">' + res.tip + ' The sponsors will want to see a stronger plan next time.</p>') +
+    '<dl class="spec">' +
+      '<dt>Rocket</dt><dd>' + r.name + '</dd>' +
+      '<dt>Craft mass</dt><dd>' + nf(mass()) + ' kg</dd>' +
+      '<dt>Flight odds</dt><dd>' + Math.round(res.odds * 100) + '%</dd>' +
+      (res.roll === null ? '' : '<dt>Dice roll</dt><dd>' + Math.round(res.roll * 100) + ' (needed under ' + Math.round(res.odds * 100) + ')</dd>') +
+      '<dt>Signal strength</dt><dd>' + link() + ' / ' + T().link + '</dd>' +
+      '<dt>Science returned</dt><dd>' + (res.ok ? res.sci : 0) + '</dd>' +
+      '<dt>Coins left</dt><dd>' + nf(state.wallet) + '</dd>' +
+    '</dl>' + (o && o.log.length ? '<div class="stack"><div class="meta">Mission log</div><ol class="oplog">' + o.log.map(function(l){ return '<li><b>' + l.title + ':</b> ' + l.label + '. ' + l.out + '</li>'; }).join('') + '</ol></div>' : '') +
+    (res.ok ? starsResultHTML(res) : '') +
+    '<div class="row">' + (res.ok ? '<button type="button" class="btn primary" data-act="reset">Back to the map</button><button type="button" class="btn" data-act="retry">Fly it again for more stars</button>' : '<button type="button" class="btn primary" data-act="retry">Try this mission again</button><button type="button" class="btn" data-act="reset">Back to the map</button>') + '</div></div>';
+}
+
+/* ---------- Success: impact on today's world ---------- */
+var GLYPHS = {
+  storm:'<path d="M12 12a3 3 0 1 1 3 3 6 6 0 1 1 3-9M12 12a3 3 0 1 1-3-3 6 6 0 1 1-3 9"/>',
+  wave:'<path d="M3 9c3-3 5 3 9 0s6 3 9 0M3 15c3-3 5 3 9 0s6 3 9 0"/>',
+  ice:'<path d="M12 3v18M4.5 7.5l15 9M19.5 7.5l-15 9"/>',
+  flask:'<path d="M9 3h6M10 3v6l-5.5 9.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3M7.5 15h9"/>',
+  cross:'<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',
+  crystal:'<path d="M12 2l7 6-7 14L5 8zM5 8h14"/>',
+  wifi:'<path d="M3 9a13 13 0 0 1 18 0M6.5 13a8 8 0 0 1 11 0M10 17a3 3 0 0 1 4 0"/><circle cx="12" cy="20" r=".8"/>',
+  book:'<path d="M12 6c-2-2-5-2-8-2v15c3 0 6 0 8 2 2-2 5-2 8-2V4c-3 0-6 0-8 2zM12 6v15"/>',
+  heart:'<path d="M12 20S4 15 4 9a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 9c0 6-8 11-8 11z"/>',
+  drop:'<path d="M12 3s7 7.5 7 12a7 7 0 0 1-14 0c0-4.500 7-12 7-12z"/>',
+  fuel:'<path d="M12 2c3 3 5 7 5 11l2 5h-4l-1 3h-4l-1-3H5l2-5c0-4 2-8 5-11z"/>',
+  gear:'<circle cx="12" cy="12" r="3.500"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/>',
+  screen:'<rect x="3" y="4" width="18" height="13" rx="1"/><path d="M8 21h8M12 17v4"/>',
+  scope:'<path d="M4 15l13-7 2 4-13 7zM10 16l-3 6M12 15l4 7"/>',
+  star:'<path d="M12 3l2.700 6 6.300.700-4.700 4.300 1.300 6.500L12 17.300 6.400 20.500l1.300-6.500L3 9.700 9.300 9z"/>'
+};
+var IMPACTS = {
+  climate:{ tint:'#37d0ff', spots:[
+    { g:'storm', t:'Earlier storm warnings', d:'Your data shows forecasters where storms are forming sooner. Families now have days, not hours, to move to safety.' },
+    { g:'wave', t:'Protected coastal towns', d:'New maps of rising water help coastal towns decide where to build sea walls and where to stop building.' },
+    { g:'ice', t:'A clearer picture of the ice', d:'Scientists can now compare how fast ice is melting each season, which makes climate predictions more trustworthy.' } ] },
+  medicine:{ tint:'#ff5fa8', spots:[
+    { g:'crystal', t:'Better protein crystals', d:'Crystals grow more evenly in near-zero gravity. Your results help researchers see the shape of proteins that cause disease.' },
+    { g:'flask', t:'New lab experiments', d:'Laboratories on Earth are repeating your experiments to test new ideas for medicines.' },
+    { g:'cross', t:'Hope in hospitals', d:'Doctors are watching this research closely, because it could one day lead to better treatments for patients.' } ] },
+  internet:{ tint:'#ffd24a', spots:[
+    { g:'wifi', t:'Remote villages online', d:'Places with no cables can now connect through your relay and reach the rest of the world.' },
+    { g:'book', t:'Schools connected', d:'Students in faraway towns can open the same online lessons and libraries as students in big cities.' },
+    { g:'heart', t:'Doctors within reach', d:'Clinics can now video call specialists, so a patient does not always need to travel for days to get advice.' } ] },
+  resources:{ tint:'#ff6b2c', spots:[
+    { g:'drop', t:'Water mapped in space', d:'Your survey shows future crews where to find water, one of the most valuable resources beyond Earth.' },
+    { g:'fuel', t:'Cheaper fuel for the next fleet', d:'Water can be split into rocket fuel. If crews can make it in space, far less has to be hauled up from Earth.' },
+    { g:'gear', t:'New jobs and industries', d:'Engineers and companies on Earth are now designing the machines that future space mines will need.' } ] },
+  education:{ tint:'#5fe3a1', spots:[
+    { g:'screen', t:'A mission in every classroom', d:'Students around the world followed your flight live and studied your real data in class.' },
+    { g:'scope', t:'A new wave of stargazers', d:'Astronomy clubs and science fairs are filling up with young people who want to explore your discoveries.' },
+    { g:'star', t:'Future engineers inspired', d:'Somewhere, a student watched your mission and decided to build the next one.' } ] }
+};
+var SPOTS = [[110,232],[240,205],[370,232]];
+function impactSceneSVG(){
+  var c = IMPACTS[state.benefit], id = 'e' + (++uid), mark = '';
+  var body = { moon:'#c9ccd4', venus:'#e6b35c', mars:'#d9694a', europa:'#d9cdb4', titan:'#d99a3c', pluto:'#cdb9a6', milky:'#b08cff', andromeda:'#ff8fd0' }[state.dest];
+  for (var i = 0, stars = ''; i < 34; i++) stars += '<circle cx="' + ((i * 89 + 17) % 480) + '" cy="' + ((i * 53 + 11) % 170) + '" r="' + (i % 4 ? .9 : 1.5) + '" fill="#dfe9ff"/>';
+  if (body) mark = '<circle cx="408" cy="56" r="30" fill="' + body + '"/><circle cx="398" cy="48" r="5" fill="rgba(0,0,0,.14)"/><circle cx="416" cy="66" r="7" fill="rgba(0,0,0,.12)"/><text x="408" y="104" text-anchor="middle" fill="#9db7e6" font-size="11">' + T().name + '</text>';
+  return '<svg viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(state.name || 'Your craft') + ' sends its findings down to three places on Earth, helping with ' + BENEFITS[state.benefit].name.toLowerCase() + '."><defs><clipPath id="' + id + '"><circle cx="240" cy="420" r="240"/></clipPath></defs>' +
+    '<rect width="480" height="270" fill="#050a18"/>' + stars + mark +
+    '<circle cx="240" cy="420" r="248" fill="#7cc4ff" opacity=".25"/><circle cx="240" cy="420" r="240" fill="#1b5fae"/>' +
+    '<g clip-path="url(#' + id + ')" fill="#3fa372"><path d="M30 240C70 205 130 205 160 232C185 255 150 270 100 270H20Z"/><path d="M215 192C255 180 300 192 320 218C335 240 300 270 255 270C225 245 195 215 215 192Z"/><path d="M360 220C395 208 450 225 470 270H370C350 250 345 232 360 220Z"/></g>' +
+    '<line id="beam" class="beam" x1="170" y1="104" x2="' + SPOTS[0][0] + '" y2="' + SPOTS[0][1] + '" stroke="' + c.tint + '" stroke-width="3"/>' +
+    myCraft(130, 24, 80, 88, 0) + '</svg>';
+}
+function impactHTML(res){
+  var c = IMPACTS[state.benefit], share = res.sci / T().sci, nm = esc(state.name || 'Your craft');
+  var level = share >= 1 ? ['A turning point', 'So much data came home that this field will not be the same again.'] : share >= .5 ? ['A real difference', 'Enough data came home to change how people work on this problem.'] : ['A first step', 'Only part of the data came home, but it proved the idea can work.'];
+  return '<div class="impact stack"><div class="meta">Impact on today\'s world · ' + level[0] + '</div><h3 class="evt">How ' + nm + ' changed the world</h3>' +
+    '<p>' + BENEFITS[state.benefit].done + ' ' + level[1] + '</p>' +
+    '<figure class="scene impactscene"><div class="impactview">' + impactSceneSVG() + c.spots.map(function(sp, i){
+      return '<button type="button" class="hot" style="left:' + (SPOTS[i][0] / 4.8) + '%;top:' + (SPOTS[i][1] / 2.7) + '%;--t:' + c.tint + '" data-act="impact" data-id="' + i + '" aria-pressed="' + (i ? 'false' : 'true') + '" aria-label="' + sp.t + '" title="' + sp.t + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + GLYPHS[sp.g] + '</svg></button>';
+    }).join('') + '</div><figcaption>Tap a marker to see what changed</figcaption></figure>' +
+    '<div class="summary" id="impactInfo" aria-live="polite">' + impactText(0) + '</div></div>';
+}
+function impactText(i){ var sp = IMPACTS[state.benefit].spots[i]; return '<b>' + sp.t + '.</b> ' + sp.d; }
+function selectImpact(i){
+  document.querySelectorAll('.hot').forEach(function(b, n){ b.setAttribute('aria-pressed', n === i ? 'true' : 'false'); });
+  var beam = $('#beam'); beam.setAttribute('x2', SPOTS[i][0]); beam.setAttribute('y2', SPOTS[i][1]);
+  $('#impactInfo').innerHTML = impactText(i);
+}
+
+/* ---------- Sheet 5: Mission operations ---------- */
+function opsPool(){
+  var t = T(), big = t.rad >= .6 ? 2 : 1;
+  return {
+    storm: { title:'Solar storm', cause:'rad', lost:'was fried by a solar storm.', tip:'Radiation shielding, or safe mode, would have saved it.',
+      text:'A burst of charged particles will hit the craft within the hour.', opts:[
+      { label:'Trust the radiation shielding', need:'rad', out:'The shielding held and the instruments kept running.' },
+      { label:'Go into safe mode', sci:-.15, out:'The craft survived, but it collected no data during the storm.' },
+      { label:'Keep collecting data', dmg:big, sci:.1, out:'Extra data came in, but radiation damaged the electronics.' } ] },
+    eclipse: { title:'Power shortfall', cause:'power', lost:'ran out of power and froze.', tip:'Large solar arrays, or a lighter power load, would have helped.',
+      text:'The craft is in shadow and its batteries are falling fast.', opts:[
+      { label:'Unfold the large solar arrays', need:'solar', out:'The arrays caught enough light to cover the load.' },
+      { label:'Drain the batteries', cost:{ power:2 }, out:'Everything stayed on, but the reserve took a big hit.' },
+      { label:'Switch off the instruments', sci:-.2, out:'The heaters stayed on, but the science stopped.' },
+      { label:'Let the heaters go cold', dmg:1, out:'Power was saved, but the cold cracked some components.' } ] },
+    glitch: { title:'Computer fault', cause:'computer', lost:'lost contact after its flight computer failed.', tip:'A backup flight computer would have saved it.',
+      text:'The flight computer has started rebooting at random.', opts:[
+      { label:'Switch to the backup computer', need:'computer', out:'The backup took over without missing a command.' },
+      { label:'Send a software patch', cost:{ power:1 }, sci:-.05, out:'The patch worked after a slow upload.' },
+      { label:'Try a remote reboot', risk:{ p:.6, dmg:1 }, out:'The reboot worked first time.', bad:'The reboot corrupted part of the system.' } ] },
+    meteor: { title:'Debris warning', cause:'impact', lost:'was torn apart by a debris strike.', tip:'A stronger craft body or a dodge burn would have saved it.',
+      text:'Tracking shows debris crossing your path.', opts:[
+      { label:'Rely on the stronger craft body', need:'hull', out:'A small strike bounced off the armour.' },
+      { label:'Fire thrusters to dodge it', cost:{ fuel:1 }, out:'The debris passed safely behind you.' },
+      { label:'Hold course and hope', risk:{ p:.5, dmg:big }, out:'The debris missed.', bad:'The debris hit the craft.' } ] },
+    signal: { title:'Signal lost', cause:'computer', lost:'was never heard from again.', tip:'A stronger antenna makes contact easier to recover.',
+      text:'Mission control has lost the signal. The antenna has drifted off Earth.', opts:[
+      { label:'Reconnect with the high-gain antenna', need:'antenna', out:'The strong link found Earth in minutes.' },
+      { label:'Reconnect with the transmitter', need:'xmit', out:'The powerful transmitter punched through at once.' },
+      { label:'Fire thrusters to re-aim the craft', cost:{ fuel:1 }, out:'The craft swung back and the signal returned.' },
+      { label:'Wait for the next ground pass', sci:-.15, out:'Contact came back, but the data from that time was lost.' } ] }
+  };
+}
+function startOps(launchRes){
+  var t = T(), pool = opsPool(), keys = Object.keys(pool).filter(function(k){ return k !== 'storm' || t.rad > 0; });
+  keys.sort(function(){ return Math.random() - .5; });
+  if (linkShare() < 1) { keys.splice(keys.indexOf('signal'), 1); keys.unshift('signal'); }
+  var count = { leo:1, moon:2, venus:2, mars:2, europa:3, titan:3, pluto:3, milky:4, andromeda:5 }[state.dest];
+  var seq = ['course'].concat(keys.slice(0, count), ['downlink']);
+  var power = 4 + qty('solar') * 3 - Math.round(t.pow * 2), fuel = 3 + qty('tank') * 3 + qty('ion'), hp = 3 + qty('hull');
+  return { seq:seq, i:0, power:power, maxPower:power, fuel:fuel, maxFuel:fuel, hp:hp, maxHp:hp, mult:1, dl:.5, log:[], last:'', launch:launchRes };
+}
+function opsEvent(id){
+  var t = T();
+  if (id === 'course') return { title:'Course correction', cause:'fuel', lost:'drifted off course and was lost.', tip:'Fuel lets you fix your course.',
+    text:'Navigation shows you drifting off the path to ' + t.phrase + '.', opts:[
+    { label:'Fire the ion drive', need:'ion', cost:{ power:1 }, sci:.1, out:'A slow, efficient push set up an ideal orbit.' },
+    { label:'Big fix with the engines', cost:{ fuel:2 }, sci:.1, out:'You are right on target, and a better orbit means better data.' },
+    { label:'Small fix with the engines', cost:{ fuel:1 }, out:'That was close enough to do the job.' },
+    { label:'Save fuel and accept a poor orbit', sci:-.2, out:'You arrived, but the instruments see less from out there.' } ] };
+  if (id === 'downlink') return { title:'Send data home', cause:'computer', lost:'', tip:'',
+    text:'Earth is in view, so this is the moment to send your data home. Your signal strength is ' + link() + ' of the ' + t.link + ' needed.' + (linkShare() < 1 ? ' With this signal, only ' + Math.round(linkShare() * 100) + '% of what you send can get through.' : ''), opts:[
+    { label:'Send everything', cost:{ power:2 }, dl:1, out:'The full data set was sent to Earth.' },
+    { label:'Fast burst with the transmitter', need:'xmit', cost:{ power:1 }, dl:1, out:'The high data rate sent everything in half the time.' },
+    { label:'Send priority data only', cost:{ power:1 }, dl:.75, out:'The most valuable data was sent, and the rest stayed on board.' },
+    { label:'Send a low-power trickle', dl:.5, out:'Only half of the data made it home before the window closed.' } ] };
+  return opsPool()[id];
+}
+function optBlocked(o, opt){
+  if (opt.need && !qty(opt.need)) return 'Needs ' + PERKS.filter(function(p){ return p.id === opt.need; })[0].name.toLowerCase();
+  var c = opt.cost || {};
+  if ((c.power || 0) > o.power) return 'Not enough power';
+  if ((c.fuel || 0) > o.fuel) return 'Not enough fuel';
+  return '';
+}
+function optChips(opt){
+  var c = opt.cost || {}, x = [];
+  if (opt.need) x.push('Uses upgrade');
+  if (c.power) x.push('−' + c.power + ' power');
+  if (c.fuel) x.push('−' + c.fuel + ' fuel');
+  if (opt.dmg) x.push('−' + opt.dmg + ' craft health');
+  if (opt.risk) x.push(Math.round((1 - opt.risk.p) * 100) + '% risk of −' + opt.risk.dmg + ' craft health');
+  if (opt.sci) x.push((opt.sci > 0 ? '+' : '−') + Math.round(Math.abs(opt.sci) * 100) + '% science');
+  if (opt.dl) x.push('Sends ' + Math.round(opt.dl * 100) + '% of data');
+  if (!x.length) x.push('No cost');
+  return x.map(function(v){ return '<span class="chip">' + v + '</span>'; }).join('');
+}
+function meter(label, v, max, cls){
+  return '<div class="meter"><div class="row" style="justify-content:space-between"><span class="meta">' + label + '</span><span class="num">' + v + ' / ' + max + '</span></div><div class="bar ' + (v / max <= .34 ? (cls || 'warn') : '') + '"><i style="width:' + (max ? Math.round(v / max * 100) : 0) + '%"></i></div></div>';
+}
+function stepOps(){
+  var o = state.ops, head = '<section class="panel"><div class="hd"><span>Sheet 5 of 5</span><span>Mission control</span></div><div class="bd stack">';
+  if (state.result) return head + '<h2>Mission report</h2><div id="result" aria-live="polite">' + resultHTML(state.result) + '</div></div></section>';
+  var ev = opsEvent(o.seq[o.i]);
+  return head + '<h2>Operate the mission</h2>' +
+    '<div class="meters">' + meter('Power ' + tip('Power runs the craft and sends data home.'), o.power, Math.max(o.maxPower, 1)) + meter('Fuel ' + tip('Fuel, or propellant, lets the craft steer and dodge.'), o.fuel, Math.max(o.maxFuel, 1)) + meter('Craft health ' + tip('If craft health reaches zero, the mission is lost.'), o.hp, o.maxHp, 'bad') + '</div>' +
+    (o.last ? '<div class="summary" aria-live="polite">' + o.last + '</div>' : '') +
+    '<div class="meta">Event ' + (o.i + 1) + ' of ' + o.seq.length + '</div><h3 class="evt">' + ev.title + '</h3><p>' + ev.text + '</p>' +
+    '<div id="opopts">' + ev.opts.map(function(opt, i){
+      var why = optBlocked(o, opt);
+      return '<div class="perk"><div><div class="nm">' + opt.label + '</div><div class="chips">' + optChips(opt) + '</div>' + (why ? '<div class="note">' + why + '</div>' : '') + '</div><div class="ctl"><button type="button" class="btn primary" data-act="ops" data-id="' + i + '"' + (why ? ' disabled' : '') + '>Choose</button></div></div>';
+    }).join('') + '</div></div></section>';
+}
+function chooseOp(i){
+  var o = state.ops, ev = opsEvent(o.seq[o.i]), opt = ev.opts[i];
+  if (!opt || state.result || optBlocked(o, opt)) return;
+  var c = opt.cost || {}, dmg = opt.dmg || 0, out = opt.out;
+  o.power -= c.power || 0; o.fuel -= c.fuel || 0; o.mult += opt.sci || 0;
+  if (opt.dl) o.dl = opt.dl;
+  if (opt.risk && Math.random() >= opt.risk.p) { dmg = opt.risk.dmg; out = opt.bad; }
+  o.hp = Math.max(0, o.hp - dmg);
+  o.log.push({ title:ev.title, label:opt.label, out:out });
+  o.last = esc(out); o.i++;
+  var nm = state.name || 'Your craft', L = o.launch;
+  if (o.hp <= 0) state.result = { ok:false, cause:ev.cause, odds:L.odds, roll:L.roll, msg:'Failure! ' + nm + ' ' + ev.lost, tip:ev.tip };
+  else if (o.i >= o.seq.length) {
+    var got = Math.round(T().sci * D().sci * (1 + .3 * qty('pod')) * Math.max(.1, o.mult)), back = Math.round(got * linkShare() * o.dl);
+    awardLevel(back);
+    state.result = { ok:true, odds:L.odds, roll:L.roll, sci:back, msg:'Success! ' + nm + ' collected ' + got + ' science data at ' + T().phrase + ', and ' + back + ' reached Earth.' };
+  }
+  renderStep(); window.scrollTo({ top:0, behavior:'smooth' });
+  if (state.result) { if (state.result.ok) fxConfetti(); else fxShake(); }
+  var f = $('#opopts button:not(:disabled)') || $('[data-act="reset"],[data-act="retry"]'); if (f) f.focus({ preventScroll:true });
+}
+
+/* ---------- Routing ---------- */
+function renderStep(){
+  document.body.classList.toggle('launchstep', state.step === 4 || state.step === 0);
+  sheet.innerHTML = [stepMap, stepBuild, stepPitch, stepWorkshop, stepLaunch, stepOps][state.step]();
+  if (state.step === 1) updateMinis();
+  if (state.step === 4) updateLaunchView();
+}
+function setStep(n){
+  if (state.launching || state.result || state.ops) return;
+  if (n >= 1 && !state.dest) return;
+  if (n > 2 && !state.pitched) return;
+  state.step = n; renderNav(); renderStep();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+function refreshAll(){ renderHead(); renderNav(); updatePreview(); renderStep(); }
+
+/* ---------- Events ---------- */
+$('#nav').addEventListener('click', function(e){
+  var b = e.target.closest('[data-step]'); if (b && !b.disabled) setStep(+b.getAttribute('data-step'));
+});
+sheet.addEventListener('input', function(e){
+  var t = e.target;
+  if (t.id === 'name') { state.name = t.value; updatePreview(); }
+  else if (t.id === 'pitch') { state.pitch = t.value; $('#pc').textContent = t.value.length; updatePitchBtn(); }
+  else if (t.type === 'color') {
+    var key = t.id === 'hullCustom' ? 'hull' : 'accent';
+    state[key === 'hull' ? 'primary' : 'accent'] = t.value;
+    var lab = t.closest('.sw'); lab.style.setProperty('--c', t.value); lab.classList.add('on');
+    sheet.querySelectorAll('input[name="' + key + '"]').forEach(function(r){ r.checked = false; });
+    updatePreview(); updateMinis();
+  }
+});
+sheet.addEventListener('change', function(e){
+  var t = e.target; if (t.type !== 'radio') return;
+  var v = t.value;
+  if (t.name === 'design') { state.wallet += D().cost - DESIGNS[v].cost; state.design = v; renderHead(true); updatePreview(); }
+  else if (t.name === 'hull' || t.name === 'accent') {
+    state[t.name === 'hull' ? 'primary' : 'accent'] = v;
+    var c = t.closest('.swatches').querySelector('.sw.custom'); if (c) c.classList.remove('on');
+    updatePreview(); updateMinis();
+  }
+  else if (t.name === 'livery') { state.livery = v; updatePreview(); updateMinis(); }
+  else if (t.name === 'dest') { state.dest = v; updatePreview(); updatePitchBtn(); }
+  else if (t.name === 'benefit') { state.benefit = v; updatePitchBtn(); }
+  else if (t.name === 'rocket') { state.rocket = v; updateLaunchView(); }
+});
+sheet.addEventListener('click', function(e){
+  var g = e.target.closest('[data-go]'); if (g && !g.disabled) { setStep(+g.getAttribute('data-go')); return; }
+  var a = e.target.closest('[data-act]'); if (!a || a.disabled) return;
+  var act = a.getAttribute('data-act'), id = a.getAttribute('data-id');
+  if (act === 'pitch') deliverPitch();
+  else if (act === 'perk-add') {
+    var p = PERKS.filter(function(x){ return x.id === id; })[0];
+    if (qty(id) < p.max && state.wallet - p.cost >= RESERVE) { state.perks[id] = qty(id) + 1; state.wallet -= p.cost; refreshWorkshop('[data-act="perk-sub"][data-id="' + id + '"]'); }
+  }
+  else if (act === 'perk-sub') {
+    var q = PERKS.filter(function(x){ return x.id === id; })[0];
+    if (qty(id) > 0) { state.perks[id] = qty(id) - 1; state.wallet += q.cost; refreshWorkshop('[data-act="perk-add"][data-id="' + id + '"]'); }
+  }
+  else if (act === 'skip') lsSkip();
+  else if (act === 'ops') chooseOp(+id);
+  else if (act === 'impact') selectImpact(+id);
+  else if (act === 'launch') launch();
+  else if (act === 'reset') { Object.assign(state, fresh()); mapSel = nextLevel(); refreshAll(); window.scrollTo({ top:0, behavior:'smooth' }); }
+  else if (act === 'retry') { var again = state.dest; Object.assign(state, fresh()); state.dest = again; state.step = 1; refreshAll(); window.scrollTo({ top:0, behavior:'smooth' }); }
+  else if (act === 'mapsel') selectLevel(+id);
+  else if (act === 'mapstart') startLevel(+id);
+  else if (act === 'mapwipe') wipeProgress(a);
+});
+
+/* ---------- Launch scene: visuals only, outcome is still decided in finish() ---------- */
+var LS = { raf:0, t:-99, parts:[], stars:[], clouds:[], done:null, last:0, W:0, H:0, g:null };
+var LS_SEP = 5.2, LS_END = 8.6;
+var clamp01 = function(v){ return Math.max(0, Math.min(1, v)); };
+var mixc = function(a, b, k){ return 'rgb(' + a.map(function(v, i){ return Math.round(v + (b[i] - v) * k); }).join(',') + ')'; };
+function lsSize(){
+  var cv = $('#launchCv'); if (!cv) return false;
+  var b = cv.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
+  if (LS.W !== b.width || LS.H !== b.height) {
+    LS.W = b.width; LS.H = b.height; cv.width = b.width * dpr; cv.height = b.height * dpr;
+    LS.stars = []; LS.clouds = [];
+    for (var i = 0; i < 170; i++) LS.stars.push([Math.random() * LS.W, Math.random() * LS.H, .4 + Math.random() * 1.2]);
+    for (var j = 0; j < 12; j++) LS.clouds.push([Math.random() * LS.W, LS.H * (1 + j * .55), 70 + Math.random() * 130]);
+  }
+  LS.g = cv.getContext('2d'); LS.g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return true;
+}
+function lsDims(){
+  var r = { sparrow:[.42,.075], kestrel:[.54,.085], leviathan:[.68,.1] }[state.rocket] || [.54,.085], H = LS.H;
+  return { gy:H * .84, h:H * r[0], w:Math.max(26, Math.min(H * r[1], LS.W * .13)), big:state.rocket === 'leviathan', cx:LS.W * .56 };
+}
+function lsOver(){ var r = ROCKETS[state.rocket]; return r && need() > r.cap; }
+function lsAlt(t){
+  if (t <= 0) return 0;
+  if (lsOver()) { if (t < 2.2) return LS.H * .035 * t * t; var d = t - 2.2; return Math.max(0, LS.H * (.17 + .16 * d - .3 * d * d)); }
+  return LS.H * .12 * Math.pow(t, 2.4);
+}
+function lsCyl(g, x, w){ var c = g.createLinearGradient(x, 0, x + w, 0); c.addColorStop(0, '#6e788f'); c.addColorStop(.28, '#ffffff'); c.addColorStop(.55, '#e4e8f1'); c.addColorStop(1, '#5e6880'); return c; }
+function lsRocket(g, D, part){
+  var w = D.w, h = D.h, x = -w / 2, sh = .6 * h, top = .82 * h;
+  function nozzle(nx, nw, ny){ var c = g.createLinearGradient(nx - nw, 0, nx + nw, 0); c.addColorStop(0, '#22262f'); c.addColorStop(.5, '#7a8091'); c.addColorStop(1, '#16191f'); g.fillStyle = c; g.beginPath(); g.moveTo(nx - nw * .45, -ny); g.lineTo(nx + nw * .45, -ny); g.lineTo(nx + nw, -ny + nw * 1.3); g.lineTo(nx - nw, -ny + nw * 1.3); g.closePath(); g.fill(); }
+  if (part !== 'upper') {
+    if (D.big) [-1, 1].forEach(function(d){
+      var bw = w * .42, bx = d * (w / 2 + bw / 2) - bw / 2, bh = sh * .9;
+      nozzle(bx + bw / 2, bw * .34, 0);
+      g.fillStyle = lsCyl(g, bx, bw); g.fillRect(bx, -bh, bw, bh);
+      g.fillStyle = state.accent; g.beginPath(); g.moveTo(bx, -bh); g.quadraticCurveTo(bx + bw * .1, -bh - bw * 1.1, bx + bw / 2, -bh - bw * 1.5); g.quadraticCurveTo(bx + bw * .9, -bh - bw * 1.1, bx + bw, -bh); g.fill();
+      g.fillStyle = '#20242e'; g.fillRect(bx, -bh * .22, bw, 3);
+    });
+    [-.27, 0, .27].forEach(function(o){ nozzle(o * w, w * .15, 0); });
+    g.fillStyle = lsCyl(g, x, w); g.fillRect(x, -sh, w, sh);
+    g.strokeStyle = 'rgba(30,40,60,.22)'; g.lineWidth = 1;
+    for (var i = 1; i < 7; i++) { g.beginPath(); g.moveTo(x, -sh * i / 7); g.lineTo(x + w, -sh * i / 7); g.stroke(); }
+    g.fillStyle = '#1c2029'; g.fillRect(x, -sh * .08, w, sh * .05); g.fillRect(x, -sh * .2, w * .5, sh * .05); g.fillRect(x + w * .5, -sh * .3, w * .5, sh * .05);
+    g.fillStyle = state.accent; g.fillRect(x, -sh * .98, w, 4);
+    if (!D.big) { g.fillStyle = '#2b2f3a'; [[x, -1], [x + w, 1]].forEach(function(f){ g.beginPath(); g.moveTo(f[0], -h * .11); g.lineTo(f[0] + f[1] * w * .36, -h * .005); g.lineTo(f[0], -h * .02); g.fill(); }); }
+    g.save(); g.translate(w * .11, -sh * .64); g.rotate(-Math.PI / 2); g.fillStyle = '#1f2a44'; g.font = '700 ' + Math.max(9, w * .3) + 'px Arial,sans-serif'; g.textAlign = 'center'; g.fillText(String(state.name || 'Rocket').toUpperCase().slice(0, 18), 0, 0); g.restore();
+  }
+  if (part !== 'lower') {
+    g.fillStyle = '#282c36'; g.fillRect(x + 1, -.64 * h, w - 2, .04 * h);
+    if (part === 'upper') nozzle(0, w * .18, .6 * h);
+    g.fillStyle = lsCyl(g, x, w); g.fillRect(x, -top, w, top - .64 * h);
+    g.fillStyle = state.accent; g.fillRect(x, -top + 2, w, 5); g.fillRect(x, -.68 * h, w, 3);
+    var fc = g.createLinearGradient(x, 0, x + w, 0); fc.addColorStop(0, 'rgba(0,0,0,.42)'); fc.addColorStop(.3, 'rgba(255,255,255,.2)'); fc.addColorStop(.6, 'rgba(0,0,0,0)'); fc.addColorStop(1, 'rgba(0,0,0,.42)');
+    [state.primary, fc].forEach(function(f){ g.fillStyle = f; g.beginPath(); g.moveTo(x, -top); g.bezierCurveTo(x, -top - h * .09, x + w * .25, -h * .97, 0, -h); g.bezierCurveTo(w * .25, -h * .97, w / 2, -top - h * .09, w / 2, -top); g.closePath(); g.fill(); });
+  }
+}
+function lsFlame(g, x, y, w, L, thin){
+  var fl = L * (.92 + Math.random() * .16), c = g.createLinearGradient(0, y, 0, y + fl);
+  c.addColorStop(0, '#ffffff'); c.addColorStop(.22, '#fff0b0'); c.addColorStop(.55, thin ? 'rgba(140,190,255,.7)' : '#ff9a2e'); c.addColorStop(1, 'rgba(255,90,20,0)');
+  g.fillStyle = c; g.beginPath(); g.moveTo(x - w / 2, y); g.bezierCurveTo(x - w * (thin ? 1.5 : .8), y + fl * .3, x - w * .3, y + fl * .8, x, y + fl); g.bezierCurveTo(x + w * .3, y + fl * .8, x + w * (thin ? 1.5 : .8), y + fl * .3, x + w / 2, y); g.closePath(); g.fill();
+}
+function lsPad(g, D, y0, t){
+  var W = LS.W, gy = y0, H = LS.H;
+  if (gy - H > H) return;
+  /* far shore and buildings */
+  g.fillStyle = '#4d6f8d'; g.fillRect(0, gy - H * .045, W, H * .045);
+  g.fillStyle = '#31495f'; g.beginPath(); g.moveTo(0, gy - H * .045); [[.08,.075],[.17,.055],[.27,.09],[.38,.06],[.5,.08],[.66,.055],[.8,.085],[.92,.06],[1,.08]].forEach(function(p){ g.lineTo(W * p[0], gy - H * p[1]); }); g.lineTo(W, gy - H * .045); g.fill();
+  g.fillStyle = '#c7ced8'; g.fillRect(W * .08, gy - H * .22, W * .095, H * .18);
+  g.fillStyle = '#8c98a8'; g.fillRect(W * .08, gy - H * .22, W * .095, H * .02); for (var v = 1; v < 5; v++) g.fillRect(W * .08 + W * .095 * v / 5, gy - H * .2, 1, H * .16);
+  g.fillStyle = '#26415a'; g.fillRect(W * .112, gy - H * .135, W * .03, H * .095);
+  /* ground */
+  var gc = g.createLinearGradient(0, gy, 0, gy + H * .16); gc.addColorStop(0, '#7f8791'); gc.addColorStop(1, '#3f464f'); g.fillStyle = gc; g.fillRect(0, gy, W, H);
+  g.fillStyle = 'rgba(255,255,255,.3)'; g.fillRect(0, gy + H * .07, W, 2);
+  /* launch mount */
+  var cx = D.cx, mw = D.w * 2.6;
+  g.fillStyle = '#4b515c'; g.fillRect(cx - mw, gy - D.w * .4, mw * 2, D.w * .4 + 4);
+  g.fillStyle = '#14161b'; g.fillRect(cx - D.w * .62, gy - D.w * .4, D.w * 1.24, D.w * .4 + 12);
+  g.fillStyle = '#6a717d'; [-1, 1].forEach(function(d){ g.fillRect(cx + d * D.w * .78 - 4, gy - D.w * .6, 8, D.w * .25); });
+  /* tower */
+  var tw = Math.max(26, D.w * .95), tx = cx - D.w * 1.05 - tw - (D.big ? D.w * .7 : 0), th = D.h * 1.14, sg = 9;
+  g.strokeStyle = '#a23c2a'; g.lineWidth = 2; g.strokeRect(tx, gy - th, tw, th);
+  g.lineWidth = 1.2;
+  for (var i = 0; i < sg; i++) { var a = gy - th * i / sg, b = gy - th * (i + 1) / sg; g.beginPath(); g.moveTo(tx, a); g.lineTo(tx + tw, b); g.moveTo(tx + tw, a); g.lineTo(tx, b); g.moveTo(tx, b); g.lineTo(tx + tw, b); g.stroke(); }
+  g.fillStyle = '#6d2a1f'; g.fillRect(tx - 3, gy - th - 5, tw + 6, 6);
+  g.strokeStyle = '#555c68'; g.lineWidth = 2.5; g.beginPath(); g.moveTo(tx + tw / 2, gy - th - 5); g.lineTo(tx + tw / 2, gy - th - D.h * .16); g.stroke();
+  var open = clamp01((t + 3) / 1.2), ay = gy - D.h * .74, ang = -open * 1.15, reach = cx - D.w / 2 - tx - tw;
+  g.save(); g.translate(tx + tw, ay); g.rotate(ang); g.fillStyle = '#7a3324'; g.fillRect(0, -4, reach, 8); g.restore();
+  /* other pad details */
+  g.fillStyle = '#d7dce4'; var wx = cx + D.w * 3.4 + (D.big ? D.w : 0); g.fillRect(wx - 2, gy - H * .19, 4, H * .19); g.beginPath(); g.ellipse(wx, gy - H * .21, 18, 13, 0, 0, 6.283); g.fill();
+  g.strokeStyle = '#555c68'; g.lineWidth = 1.5; [wx + W * .08, Math.max(8, tx - W * .05)].forEach(function(x){ g.beginPath(); g.moveTo(x, gy); g.lineTo(x, gy - H * .3); g.stroke(); });
+  if (t > -1.2) { var e = clamp01((t + 1.2) * 1.3), r = g.createRadialGradient(cx, gy, 4, cx, gy, H * .42); r.addColorStop(0, 'rgba(255,190,90,' + .7 * e + ')'); r.addColorStop(1, 'rgba(255,120,30,0)'); g.fillStyle = r; g.fillRect(0, gy - H * .45, W, H * .7); }
+}
+var LS_SPR = {};
+function lsSprite(c){
+  if (LS_SPR[c]) return LS_SPR[c];
+  var e = document.createElement('canvas'); e.width = e.height = 96;
+  var g = e.getContext('2d'), r = g.createRadialGradient(48, 48, 3, 48, 48, 48);
+  r.addColorStop(0, 'rgba(' + c + ',.95)'); r.addColorStop(.45, 'rgba(' + c + ',.5)'); r.addColorStop(1, 'rgba(' + c + ',0)');
+  g.fillStyle = r; g.fillRect(0, 0, 96, 96);
+  return LS_SPR[c] = e;
+}
+function lsEmit(D, t, cam, s, x, dt){
+  var P = LS.parts, gy = D.gy, alt = lsAlt(t), wx = x, over = lsOver();
+  if (t > -1.1 && alt < LS.H * .75) for (var i = 0, gn = Math.round(300 * dt); i < gn; i++) {
+    var d = Math.random() < .5 ? -1 : 1;
+    P.push({ x:D.cx + d * D.w * .5, w:Math.random() * 10, vx:d * (70 + Math.random() * 230), vw:18 + Math.random() * 50, r:24 + Math.random() * 36, g:62, a:0, m:1.8 + Math.random() * 1.6, c:0 });
+  }
+  if (t > 0 && (over || t < LS_SEP || t > LS_SEP + .7) && alt < LS.H * 7) {
+    var n = Math.round((t < LS_SEP ? 240 : 110) * dt);
+    for (var j = 0; j < n; j++) P.push({ x:wx + (Math.random() - .5) * D.w * .7 * s, w:alt + (t > LS_SEP ? .6 * D.h * s : 0) - Math.random() * 18, vx:(Math.random() - .5) * 26, vw:-40 - Math.random() * 60, r:14 + Math.random() * 16 * s, g:30, a:0, m:1.5 + Math.random() * 1.9, c:1 });
+  }
+  if (P.length > 950) P.splice(0, P.length - 950);
+}
+function lsBoom(D){
+  for (var i = 0; i < 180; i++) { var a = Math.random() * 6.283, v = 40 + Math.random() * 300; LS.parts.push({ x:D.cx, w:lsAlt(LS.t) + D.h * .3, vx:Math.cos(a) * v, vw:Math.sin(a) * v, r:8 + Math.random() * 20, g:34, a:0, m:1 + Math.random() * 1.8, c:2 }); }
+}
+function lsDraw(t, dt){
+  var g = LS.g, W = LS.W, H = LS.H, D = lsDims(), alt = lsAlt(t), cam = Math.max(0, alt - H * .16), a = clamp01(alt / (H * 9));
+  var over = lsOver(), boom = over && t >= 3.3;
+  var sky = g.createLinearGradient(0, 0, 0, H);
+  sky.addColorStop(0, mixc([58,118,186], [1,2,12], clamp01(a * 2.1)));
+  sky.addColorStop(.62, mixc([140,186,226], [4,10,38], clamp01(a * 1.9)));
+  sky.addColorStop(1, mixc([255,214,170], [12,40,110], clamp01(a * 1.6)));
+  g.fillStyle = sky; g.fillRect(0, 0, W, H);
+  var st = clamp01((a - .28) * 2.4);
+  if (st > 0) { g.fillStyle = '#fff'; LS.stars.forEach(function(q){ g.globalAlpha = st * (.5 + q[2] * .35); g.beginPath(); g.arc(q[0], q[1], q[2], 0, 6.283); g.fill(); }); g.globalAlpha = 1; }
+  var e = clamp01((a - .42) * 2.2);
+  if (e > 0) {
+    var ey = H * 2.75 - e * H * .46, R = H * 1.75;
+    var gl = g.createRadialGradient(W / 2, ey, R * .97, W / 2, ey, R * 1.05); gl.addColorStop(0, 'rgba(120,200,255,.95)'); gl.addColorStop(1, 'rgba(70,150,255,0)');
+    g.fillStyle = gl; g.beginPath(); g.arc(W / 2, ey, R * 1.05, 0, 6.283); g.fill();
+    g.fillStyle = '#1a5fa6'; g.beginPath(); g.arc(W / 2, ey, R, 0, 6.283); g.fill();
+    g.save(); g.beginPath(); g.arc(W / 2, ey, R, 0, 6.283); g.clip(); g.fillStyle = 'rgba(255,255,255,.55)'; for (var c = 0; c < 9; c++) { g.beginPath(); g.ellipse(W * (c * .137 + .03), ey - R + 26 + (c % 3) * 22, 80, 7, 0, 0, 6.283); g.fill(); } g.globalAlpha = .6; g.drawImage(lsSprite('70,140,95'), W * .38, ey - R + 34, W * .55, 110); g.drawImage(lsSprite('95,150,100'), W * .05, ey - R + 60, W * .3, 70); g.globalAlpha = 1; g.restore();
+  }
+  lsPad(g, D, D.gy + cam, t);
+  LS.clouds.forEach(function(q){
+    var y = D.gy - q[1] + cam; if (y < -60 || y > H + 60) return;
+    g.fillStyle = 'rgba(255,255,255,.72)';
+    [[0,0,1],[.55,8,.65],[-.55,9,.7],[.25,-9,.55]].forEach(function(b){ g.beginPath(); g.ellipse(q[0] + b[0] * q[2], y + b[1], q[2] * .55 * b[2], q[2] * .16 * b[2], 0, 0, 6.283); g.fill(); });
+  });
+  var tiltT = over ? clamp01((t - 1.7) / 1.5) * .95 : 0;
+  var climb = clamp01((t - .3) / 6.5), s = 1 - .56 * climb * (2 - climb), drift = over ? 0 : climb * climb * W * .05;
+  var x = D.cx + drift, base = D.gy - alt + cam, sep = !over && t >= LS_SEP;
+  /* particles behind the rocket */
+  if (dt) {
+    lsEmit(D, t, cam, s, x, dt);
+    LS.parts.forEach(function(p){ p.a += dt; p.x += p.vx * dt; p.w += p.vw * dt; p.vx *= .985; p.r += p.g * dt; });
+    LS.parts = LS.parts.filter(function(p){ return p.a < p.m; });
+  }
+  LS.parts.forEach(function(p){
+    var k = p.a / p.m, y = D.gy - p.w + cam; if (y < -90 || y > H + 90) return;
+    g.globalAlpha = (p.c === 2 ? .9 : .5) * (1 - k * k);
+    var col = p.c === 2 ? (k < .3 ? '255,215,130' : k < .55 ? '255,120,45' : '58,60,68') : (k < .09 ? '255,215,150' : k < .22 ? '244,214,190' : (p.c ? '205,210,220' : '232,235,240'));
+    g.drawImage(lsSprite(col), p.x - p.r, y - p.r, p.r * 2, p.r * 2);
+  });
+  g.globalAlpha = 1;
+  if (sep) { var dd = t - LS_SEP, lb = D.gy - lsAlt(LS_SEP) + cam + 150 * dd * dd; g.save(); g.translate(x - dd * 12, lb); g.rotate(dd * .22); g.scale(s, s); lsRocket(g, D, 'lower'); g.restore(); }
+  if (!boom) {
+    g.save(); g.translate(x, base + (t > -1 && t < 0 ? Math.random() - .5 : 0)); g.rotate(tiltT); g.scale(s, s);
+    var thin = a > .35;
+    if (t > -1 && !sep) {
+      var pow = clamp01((t + 1) * 2), L = D.h * (.34 + .32 * clamp01(t / 3)) * pow;
+      [-.27, 0, .27].forEach(function(o){ lsFlame(g, o * D.w, 0, D.w * .3, L, thin); });
+      if (D.big) [-1, 1].forEach(function(d){ lsFlame(g, d * D.w * .71, 0, D.w * .24, L * .8, thin); });
+    }
+    if (sep && t > LS_SEP + .7) lsFlame(g, 0, -.6 * D.h, D.w * .32, D.h * .34, true);
+    lsRocket(g, D, sep ? 'upper' : 'full');
+    g.restore();
+  }
+}
+function lsDrawStill(){ if (lsSize()) { LS.t = -99; LS.parts = []; lsDraw(-99, 0); } }
+function lsText(id, v){ var e = $(id); if (e && e.textContent !== v) e.textContent = v; }
+function lsStart(done){
+  LS.done = done;
+  var stage = $('#stage'), slow = !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  stage.scrollIntoView({ block:'center', behavior:slow ? 'smooth' : 'auto' });
+  if (!slow) { lsText('#count', 'Liftoff'); lsText('#callout', 'Your rocket has left the pad.'); LS.raf = setTimeout(lsSkip, 500); return; }
+  $('#skipfly').hidden = false; $('#tele').hidden = false;
+  lsSize(); LS.parts = []; LS.t = -5.4; LS.last = performance.now();
+  var over = lsOver(), end = over ? 5.1 : LS_END, boomed = false;
+  var calls = over ? [[-5,'Final checks complete'],[-3,'Tower arm swinging clear'],[-1,'Main engines firing'],[0,'Liftoff'],[1.4,'Warning: rocket is too heavy'],[2.4,'Losing control'],[3.3,'Rocket lost']]
+    : [[-5,'Final checks complete'],[-3,'Tower arm swinging clear'],[-1,'Main engines firing'],[0,'Liftoff. Clamps released'],[1.6,'Clearing the tower'],[3.2,'Hardest part of the climb (max-Q)'],[LS_SEP,'First stage drops away'],[LS_SEP + .7,'Second stage firing'],[7.4,'Reaching space']];
+  (function frame(now){
+    if (!$('#launchCv') || !LS.done) return;
+    var dt = Math.min(.05, (now - LS.last) / 1000); LS.last = now; LS.t += dt;
+    var t = LS.t;
+    lsText('#count', t < -1 ? 'T-' + Math.ceil(-t) : t < 0 ? 'Ignition' : t < 1.6 ? 'Liftoff' : '');
+    if (t > -1) stage.classList.add('go');
+    calls.forEach(function(c){ if (t >= c[0]) lsText('#callout', c[1]); });
+    var km = over ? Math.min(1.2, lsAlt(t) / LS.H * .4) : 190 * Math.pow(clamp01(t / LS_END), 2.6), v = over ? (t < 3.3 ? t * 120 : 0) : 27000 * Math.pow(clamp01(t / LS_END), 1.7);
+    lsText('#tele', 'T' + (t < 0 ? '-' : '+') + Math.abs(t).toFixed(1) + ' s | ' + (t > 0 ? km.toFixed(km < 10 ? 1 : 0) : '0') + ' km up | ' + nf(Math.max(0, t > 0 ? v : 0)) + ' km/h');
+    if (over && !boomed && t >= 3.3) { boomed = true; lsBoom(lsDims()); }
+    lsDraw(t, dt);
+    if (t >= end) { lsSkip(); return; }
+    LS.raf = requestAnimationFrame(frame);
+  })(LS.last);
+}
+function lsSkip(){ var d = LS.done; if (!d) return; LS.done = null; cancelAnimationFrame(LS.raf); clearTimeout(LS.raf); var b = $('#skipfly'); if (b) b.hidden = true; d(); }
+function lsStop(){ LS.done = null; cancelAnimationFrame(LS.raf); }
+addEventListener('resize', function(){ if ($('#launchCv') && !state.launching && !state.result) lsDrawStill(); });
+
+/* ---------- Quest map ---------- */
+var LEVELS = ['leo','moon','venus','mars','europa','titan','pluto','milky','andromeda'];
+var DIFF = [1,2,3,4,6,7,8,9,10];
+var POS_W = [[80,455],[190,270],[315,430],[430,235],[550,415],[660,200],[765,390],[860,215],[930,440]];
+var POS_N = [[90,80],[300,190],[95,310],[300,425],[95,545],[300,660],[95,775],[300,885],[190,1010]];
+var PROG = (function(){
+  try { var v = JSON.parse(localStorage.getItem('pitch-to-orbit-progress')); if (v && typeof v.done === 'number') return { done:v.done, stars:v.stars || {} }; } catch (e) {}
+  return { done:0, stars:{} };
+})();
+function saveProg(){ try { localStorage.setItem('pitch-to-orbit-progress', JSON.stringify(PROG)); } catch (e) {} }
+function nextLevel(){ return Math.min(PROG.done, LEVELS.length - 1); }
+var mapSel = nextLevel(), lastAward = null;
+function starsFor(back){ var sh = back / T().sci; return sh >= 1 ? 3 : sh >= .6 ? 2 : 1; }
+function awardLevel(back){
+  var i = LEVELS.indexOf(state.dest), n = starsFor(back), had = PROG.stars[state.dest] || 0, opened = null;
+  PROG.stars[state.dest] = Math.max(had, n);
+  if (i === PROG.done) { PROG.done = i + 1; if (LEVELS[i + 1]) opened = LEVELS[i + 1]; }
+  lastAward = { n:n, opened:opened, all:PROG.done >= LEVELS.length };
+  saveProg();
+}
+function starRow(n){ var o = ''; for (var i = 0; i < 3; i++) o += '<span class="st' + (i < n ? ' on' : '') + '">★</span>'; return o; }
+function starsResultHTML(res){
+  var w = lastAward || { n:1 };
+  return '<div class="reward"><div class="bigstars" role="img" aria-label="' + w.n + ' out of 3 stars">' + starRow(w.n) + '</div><p>' + (w.n < 3 ? 'Send more science home to earn ' + (w.n + 1) + ' stars.' : 'A perfect mission!') + '</p>' +
+    (w.opened ? '<p class="unlockmsg">New mission unlocked: <b>' + DESTS[w.opened].name + '</b></p>' : '') + (w.all ? '<p class="unlockmsg"><b>Quest complete!</b> You finished every mission in the solar system and beyond.</p>' : '') + '</div>';
+}
+function planetArt(id){
+  var q = 'p' + (++uid), gr = function(a, b, c){ return '<defs><radialGradient id="' + q + '" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="' + a + '"/><stop offset=".6" stop-color="' + b + '"/><stop offset="1" stop-color="' + c + '"/></radialGradient></defs>'; };
+  var ball = '<circle cx="50" cy="50" r="38" fill="url(#' + q + ')"/>', A = {
+    leo: gr('#7fe0ff','#1c7fd6','#07316e') + ball + '<path d="M26 42c8-10 20-10 25-3 4 7-6 14-13 12-6 1-16 0-12-9zM58 62c7-6 17-5 19 1-2 8-11 12-18 9-4-3-4-7-1-10z" fill="#5fe3a1"/><path d="M22 34c12-6 22-4 30-2M50 74c8 1 16-1 22-5" stroke="#fff" stroke-opacity=".7" stroke-width="3" fill="none" stroke-linecap="round"/><ellipse cx="50" cy="50" rx="48" ry="13" fill="none" stroke="#ffd24a" stroke-width="2" transform="rotate(-20 50 50)"/><circle cx="92" cy="35" r="4" fill="#fff"/>',
+    moon: gr('#f3f4f6','#b5b8c1','#5d606b') + ball + '<g fill="#7d808b" opacity=".7"><circle cx="38" cy="38" r="8"/><circle cx="62" cy="58" r="10"/><circle cx="62" cy="30" r="4"/><circle cx="36" cy="66" r="5"/></g>',
+    venus: gr('#fff0b3','#eeb04d','#94511a') + ball + '<path d="M16 42c18-8 40 8 68-2M15 58c20 8 46-8 69 2M26 30c14-6 34 2 48-4M28 72c14 4 30-2 44 0" fill="none" stroke="#fff4c9" stroke-opacity=".65" stroke-width="4" stroke-linecap="round"/>',
+    mars: gr('#ffb48a','#d9532d','#6e1d10') + ball + '<path d="M30 24c10-5 26-5 38 0-10 5-28 5-38 0z" fill="#fff"/><path d="M22 52c14-5 32 8 52-2" stroke="#7d2413" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="62" cy="66" r="6" fill="#8f2d18"/>',
+    europa: gr('#ffffff','#d9e7ee','#7f93a5') + ball + '<path d="M22 32L52 52 80 38M28 70L48 50 66 78M50 14L54 46M66 28L74 62" stroke="#b06a3b" stroke-width="2.200" fill="none"/>',
+    titan: '<ellipse cx="50" cy="50" rx="48" ry="12" fill="none" stroke="#ffe0a3" stroke-width="5" transform="rotate(-16 50 50)"/>' + gr('#ffe6ad','#e8a33d','#8a4c12') + ball + '<path d="M16 42c20-5 48-5 68 0M14 56c22 5 50 5 72 0" stroke="#fff0c7" stroke-opacity=".5" stroke-width="4" fill="none"/><path d="M4 66a48 12 -16 0 0 92 -26" fill="none" stroke="#ffe0a3" stroke-width="5"/><circle cx="84" cy="24" r="7" fill="#ff9f3c" stroke="#fff" stroke-width="1.500"/>',
+    pluto: gr('#f7e8d7','#b99a86','#54423d') + ball + '<path d="M50 72C34 60 34 44 44 42c3 0 5 2 6 5 1-3 3-5 6-5 10 2 10 18-6 30z" fill="#fff4e4"/><circle cx="36" cy="32" r="4" fill="#6f5a53"/>',
+    milky: '<g class="gal"><g fill="none" stroke-linecap="round"><path d="M50 50C60 22 92 30 90 52M50 50C40 78 8 70 10 48M50 50C78 60 70 92 48 90M50 50C22 40 30 8 52 10" stroke="#b08cff" stroke-width="7"/><path d="M50 50C60 22 92 30 90 52M50 50C40 78 8 70 10 48M50 50C78 60 70 92 48 90M50 50C22 40 30 8 52 10" stroke="#fff" stroke-width="2"/></g><circle cx="50" cy="50" r="14" fill="#ffe59a"/><circle cx="50" cy="50" r="6" fill="#fff"/></g>',
+    andromeda: '<g transform="rotate(-28 50 50) translate(0 18) scale(1 .64)"><g class="gal"><g fill="none" stroke-linecap="round"><path d="M50 50C64 18 98 28 96 54M50 50C36 82 2 72 4 46M50 50C82 64 72 98 46 96M50 50C18 36 28 2 54 4" stroke="#ff5fa8" stroke-width="9"/><path d="M50 50C64 18 98 28 96 54M50 50C36 82 2 72 4 46M50 50C82 64 72 98 46 96M50 50C18 36 28 2 54 4" stroke="#7fe8ff" stroke-width="3"/></g><circle cx="50" cy="50" r="17" fill="#ffd9f0"/><circle cx="50" cy="50" r="8" fill="#fff"/></g></g>'
+  };
+  return '<svg viewBox="-4 -4 108 108" aria-hidden="true">' + A[id] + '</svg>';
+}
+function mapBgSVG(P, W, H){
+  var st = ''; for (var i = 0; i < 90; i++) st += '<circle cx="' + ((i * 137 + 23) % W) + '" cy="' + ((i * 211 + 41) % H) + '" r="' + (i % 5 ? 1 : 2) + '" fill="#fff" class="' + (i % 7 ? '' : 'tw') + '"/>';
+  var d = 'M' + P[0][0] + ' ' + P[0][1];
+  for (var k = 1; k < P.length; k++) { var a = P[k - 1], b = P[k]; d += 'Q' + ((a[0] + b[0]) / 2 + (k % 2 ? -34 : 34)) + ' ' + ((a[1] + b[1]) / 2) + ' ' + b[0] + ' ' + b[1]; }
+  var doneD = 'M' + P[0][0] + ' ' + P[0][1], upto = Math.min(PROG.done, P.length - 1);
+  for (var m = 1; m <= upto; m++) { var c = P[m - 1], e = P[m]; doneD += 'Q' + ((c[0] + e[0]) / 2 + (m % 2 ? -34 : 34)) + ' ' + ((c[1] + e[1]) / 2) + ' ' + e[0] + ' ' + e[1]; }
+  var belt = ''; for (var n = 0; n < 40; n++) belt += '<circle cx="' + (W > H ? 470 + n % 8 * 11 + (n * 17 % 40) : (n * 37) % W) + '" cy="' + (W > H ? n * 15.5 : 480 + n % 8 * 6 + (n * 11 % 26)) + '" r="' + (1 + n % 3) + '" fill="#c7b39c" opacity=".55"/>';
+  return '<svg class="mapbg" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" aria-hidden="true"><defs>' +
+    '<radialGradient id="neb1"><stop offset="0" stop-color="#ff5fa8" stop-opacity=".6"/><stop offset="1" stop-color="#ff5fa8" stop-opacity="0"/></radialGradient><radialGradient id="neb2"><stop offset="0" stop-color="#37d0ff" stop-opacity=".5"/><stop offset="1" stop-color="#37d0ff" stop-opacity="0"/></radialGradient><radialGradient id="neb3"><stop offset="0" stop-color="#a855ff" stop-opacity=".65"/><stop offset="1" stop-color="#a855ff" stop-opacity="0"/></radialGradient><radialGradient id="sun"><stop offset="0" stop-color="#fff6c9"/><stop offset=".4" stop-color="#ffc23d"/><stop offset="1" stop-color="#ff6b2c" stop-opacity="0"/></radialGradient><linearGradient id="trail"><stop offset="0" stop-color="#5fe3a1"/><stop offset=".5" stop-color="#ffd24a"/><stop offset="1" stop-color="#ff5fa8"/></linearGradient></defs>' +
+    '<ellipse cx="' + W * .25 + '" cy="' + H * .75 + '" rx="' + W * .4 + '" ry="' + H * .35 + '" fill="url(#neb2)"/><ellipse cx="' + W * .62 + '" cy="' + H * .3 + '" rx="' + W * .35 + '" ry="' + H * .35 + '" fill="url(#neb1)"/><ellipse cx="' + W * .9 + '" cy="' + H * .72 + '" rx="' + W * .35 + '" ry="' + H * .4 + '" fill="url(#neb3)"/>' + st + belt +
+    '<circle cx="' + (W > H ? 0 : W * .9) + '" cy="' + (W > H ? 90 : 0) + '" r="' + (W > H ? 190 : 120) + '" fill="url(#sun)"/>' +
+    '<path d="' + d + '" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="3" stroke-dasharray="3 11" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
+    (PROG.done ? '<path d="' + doneD + '" fill="none" stroke="url(#trail)" stroke-width="5" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' : '') + '</svg>';
+}
+function isNarrow(){ return !!(window.matchMedia && window.matchMedia('(max-width:700px)').matches); }
+function stepMap(){
+  var nar = isNarrow(), P = nar ? POS_N : POS_W, W = nar ? 400 : 1000, H = nar ? 1090 : 560, total = 0;
+  LEVELS.forEach(function(k){ total += PROG.stars[k] || 0; });
+  var next = nextLevel();
+  return '<section class="panel"><div class="hd"><span>Space quest</span><span>' + total + ' / ' + LEVELS.length * 3 + ' stars</span></div><div class="bd stack">' +
+    '<div class="row maptitle"><h2>Choose your next mission</h2><span class="note">Finish a mission to unlock the next one.</span></div>' +
+    '<div class="qmap" style="aspect-ratio:' + W + '/' + H + '">' + mapBgSVG(P, W, H) + LEVELS.map(function(k, i){
+      var open = i <= PROG.done, done = !!PROG.stars[k], cur = i === next && !done;
+      return '<button type="button" class="lvl' + (open ? '' : ' locked') + (done ? ' done' : '') + (cur ? ' cur' : '') + (i >= 7 ? ' galx' : '') + '" style="left:' + P[i][0] / W * 100 + '%;top:' + P[i][1] / H * 100 + '%;--d:' + (i * .23) + 's" data-act="mapsel" data-id="' + i + '" aria-pressed="' + (mapSel === i ? 'true' : 'false') + '" aria-label="Mission ' + (i + 1) + ': ' + DESTS[k].name + (open ? (done ? ', ' + PROG.stars[k] + ' stars' : '') : ', locked') + '"><span class="art">' + planetArt(k) + (open ? '' : '<span class="lock" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5z" fill="none" stroke="#fff" stroke-width="2.400" stroke-linejoin="round"/></svg></span>') + (cur ? '<span class="nexttag" aria-hidden="true">Next</span>' : '') + '</span><span class="lname">' + (i + 1) + '. ' + DESTS[k].name + '</span>' + (done ? '<span class="lst">' + starRow(PROG.stars[k]) + '</span>' : '') + '</button>';
+    }).join('') + '</div>' +
+    '<div id="mapInfo">' + mapInfoHTML(mapSel) + '</div>' +
+    (PROG.done || total ? '<div class="row"><button type="button" class="btn" data-act="mapwipe">Start the quest over</button></div>' : '') +
+    '</div></section>';
+}
+function mapInfoHTML(i){
+  var k = LEVELS[i], d = DESTS[k], open = i <= PROG.done, bars = '';
+  for (var b = 1; b <= 10; b++) bars += '<i class="' + (b <= DIFF[i] ? (DIFF[i] > 7 ? 'dhot' : DIFF[i] > 4 ? 'warm' : 'on') : '') + '"></i>';
+  return '<div class="brief' + (open ? '' : ' shut') + '"><div class="briefart">' + planetArt(k) + '</div><div class="stack briefbody"><div><div class="meta">Mission ' + (i + 1) + ' of ' + LEVELS.length + (i === LEVELS.length - 1 ? ' · Final level' : '') + '</div><h3 class="evt">' + d.name + '</h3><p class="meta">' + d.dist + '</p></div><p>' + d.blurb + '</p>' +
+    '<div class="meta diffrow">Difficulty <span class="diff" role="img" aria-label="' + DIFF[i] + ' out of 10">' + bars + '</span></div>' +
+    '<div class="chips"><span class="chip coin">Science ' + d.sci + '</span><span class="chip">Rocket power ×' + d.f + '</span><span class="chip">Signal needed ' + d.link + '</span>' + (PROG.stars[k] ? '<span class="chip">Best: ' + PROG.stars[k] + ' of 3 stars</span>' : '') + '</div>' +
+    (open ? '<button type="button" class="btn startm" data-act="mapstart" data-id="' + i + '">' + (PROG.stars[k] ? 'Fly again' : 'Start mission') + '</button>' : '<p class="note"><b>Locked.</b> Finish ' + DESTS[LEVELS[i - 1]].name + ' to unlock this mission.</p>') + '</div></div>';
+}
+function selectLevel(i){
+  mapSel = i;
+  document.querySelectorAll('.lvl').forEach(function(b, n){ b.setAttribute('aria-pressed', n === i ? 'true' : 'false'); });
+  $('#mapInfo').innerHTML = mapInfoHTML(i);
+}
+function startLevel(i){
+  if (i > PROG.done) return;
+  Object.assign(state, fresh()); state.dest = LEVELS[i]; state.step = 1;
+  lastAward = null; refreshAll(); window.scrollTo({ top:0, behavior:'smooth' });
+}
+function wipeProgress(btn){
+  if (btn.getAttribute('data-sure')) { PROG = { done:0, stars:{} }; saveProg(); mapSel = 0; renderStep(); return; }
+  btn.setAttribute('data-sure', '1'); btn.textContent = 'Click again to erase all progress';
+}
+var wasNarrow = isNarrow();
+addEventListener('resize', function(){ var n = isNarrow(); if (n !== wasNarrow) { wasNarrow = n; if (state.step === 0) renderStep(); } });
+
+/* ---------- Effects: looks only, no game rules here ---------- */
+var calm = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+var shownCoins = null, coinTimer = 0;
+function fxCoins(v){
+  var el = $('#coins'), from = shownCoins;
+  shownCoins = v;
+  clearInterval(coinTimer);
+  if (from === null || from === v || calm) { el.textContent = nf(v); return; }
+  var w = $('#wallet'), d = document.createElement('span');
+  d.className = 'delta ' + (v > from ? 'up' : 'down'); d.textContent = (v > from ? '+' : '−') + nf(Math.abs(v - from));
+  w.appendChild(d); setTimeout(function(){ d.remove(); }, 1100);
+  var n = 0, steps = 16;
+  coinTimer = setInterval(function(){
+    n++; el.textContent = nf(from + (v - from) * n / steps);
+    if (n >= steps) { clearInterval(coinTimer); el.textContent = nf(v); }
+  }, 28);
+}
+function fxSparks(x, y){
+  if (calm) return;
+  var fx = $('#fx'), cols = ['#ffd24a','#ff8a3d','#37d0ff','#fff'];
+  for (var i = 0; i < 10; i++) {
+    var e = document.createElement('i'), a = i / 10 * 6.283, r = 26 + Math.random() * 30;
+    e.className = 'spark'; e.style.cssText = 'left:' + x + 'px;top:' + y + 'px;background:' + cols[i % 4] + ';--x:' + Math.cos(a) * r + 'px;--y:' + Math.sin(a) * r + 'px';
+    fx.appendChild(e); setTimeout(e.remove.bind(e), 560);
+  }
+}
+function fxConfetti(){
+  if (calm) return;
+  var fx = $('#fx'), cols = ['#ffd24a','#ff6b2c','#37d0ff','#5fe3a1','#ff5fa8','#fff'];
+  for (var i = 0; i < 90; i++) {
+    var e = document.createElement('i');
+    e.className = 'conf'; e.style.cssText = 'left:' + Math.random() * 100 + '%;background:' + cols[i % 6] + ';--x:' + (Math.random() * 180 - 90) + 'px;--r:' + (360 + Math.random() * 720) + 'deg;--t:' + (2 + Math.random() * 1.6) + 's;--d:' + Math.random() * .5 + 's';
+    fx.appendChild(e); setTimeout(e.remove.bind(e), 4300);
+  }
+}
+function fxShake(){
+  var w = $('.wrap'); w.classList.remove('shake'); void w.offsetWidth; w.classList.add('shake');
+  setTimeout(function(){ w.classList.remove('shake'); }, 520);
+}
+function fxPop(){ var c = $('#craft'); c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
+document.addEventListener('pointerdown', function(e){
+  if (e.target.closest('.opt,.btn:not(:disabled),.hot,.sw,.steps button:not(:disabled),.patch,.lvl')) fxSparks(e.clientX, e.clientY);
+});
+sheet.addEventListener('change', function(e){ if (/^(design|hull|accent|livery)$/.test(e.target.name)) fxPop(); });
+sheet.addEventListener('click', function(e){ if (e.target.closest('[data-act^="perk"]')) fxPop(); });
+$('#patch').addEventListener('click', function(){
+  var p = this; p.classList.remove('spin'); void p.offsetWidth; p.classList.add('spin');
+});
+$('.side').addEventListener('pointermove', function(e){
+  if (calm) return;
+  var b = this.getBoundingClientRect(), c = $('#craft');
+  c.style.setProperty('--ry', ((e.clientX - b.left) / b.width - .5) * 26 + 'deg');
+  c.style.setProperty('--rx', ((e.clientY - b.top) / b.height - .5) * -18 + 'deg');
+});
+$('.side').addEventListener('pointerleave', function(){ var c = $('#craft'); c.style.setProperty('--rx', '0deg'); c.style.setProperty('--ry', '0deg'); });
+(function sky(){
+  var cv = $('#sky'), g = cv.getContext && cv.getContext('2d'); if (!g) return;
+  var W = 0, H = 0, mx = 0, my = 0, px = 0, py = 0, stars = [], shot = null, next = 120;
+  function size(){
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    stars = [];
+    for (var i = 0, n = Math.round(W * H / 7000); i < n; i++) stars.push({ x:Math.random() * W, y:Math.random() * H, r:.5 + Math.random() * 1.4, z:.2 + Math.random(), t:Math.random() * 6.283 });
+    draw(0);
+  }
+  function draw(tm){
+    g.clearRect(0, 0, W, H);
+    stars.forEach(function(s){
+      var x = (s.x + px * s.z * 26 + W) % W, y = (s.y + py * s.z * 26 + H) % H;
+      g.globalAlpha = calm ? .8 : .45 + .5 * Math.abs(Math.sin(s.t + tm / 900));
+      g.fillStyle = s.z > .9 ? '#ffe9b0' : '#dfe9ff';
+      g.beginPath(); g.arc(x, y, s.r, 0, 6.283); g.fill();
+    });
+    g.globalAlpha = 1;
+    if (shot) {
+      var gr = g.createLinearGradient(shot.x, shot.y, shot.x - 110, shot.y - 44);
+      gr.addColorStop(0, '#fff'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.strokeStyle = gr; g.lineWidth = 2; g.beginPath(); g.moveTo(shot.x, shot.y); g.lineTo(shot.x - 110, shot.y - 44); g.stroke();
+    }
+  }
+  function loop(tm){
+    if (!document.hidden) {
+      px += (mx - px) * .05; py += (my - py) * .05;
+      if (shot) { shot.x += 13; shot.y += 5.2; if (shot.x > W + 130) shot = null; }
+      else if (--next < 0) { shot = { x:Math.random() * W * .6, y:Math.random() * H * .35 }; next = 240 + Math.random() * 500; }
+      draw(tm);
+    }
+    requestAnimationFrame(loop);
+  }
+  addEventListener('resize', size);
+  addEventListener('pointermove', function(e){ mx = e.clientX / (W || 1) - .5; my = e.clientY / (H || 1) - .5; });
+  size();
+  if (!calm) requestAnimationFrame(loop);
+})();
+
+/* ---------- Boot ---------- */
+function start(data){
+  if (data && data.state) {
+    Object.assign(state, data.state);
+    if (state.launching) { state.launching = false; }
+  }
+  refreshAll();
+}
+if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(function(){ return { state:state }; });
+if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start);
+else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+})();
+</script>
